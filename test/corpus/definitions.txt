@@ -1,0 +1,107 @@
+================================================================================
+Variable definitions
+================================================================================
+
+let zero : i32 = 0
+let one: u8 = 1
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (variable_definition
+    typed_ident: (typed_identifier
+      ident: (identifier)
+      type: (primitive_type))
+    expr: (int_literal))
+  (variable_definition
+    typed_ident: (typed_identifier
+      ident: (identifier)
+      type: (primitive_type))
+    expr: (int_literal)))
+
+================================================================================
+Function definitions
+================================================================================
+
+fn foo(a: u8, b: i32): i32 {}
+fn bar(): string {}
+fn baz(arg: f64): f64 {
+  let a: f64 = arg
+  return a
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_definition
+    ident: (identifier)
+    params: (parameter_list
+      (typed_identifier
+        ident: (identifier)
+        type: (primitive_type))
+      (typed_identifier
+        ident: (identifier)
+        type: (primitive_type)))
+    type: (primitive_type)
+    body: (block))
+  (function_definition
+    ident: (identifier)
+    params: (parameter_list)
+    type: (primitive_type)
+    body: (block))
+  (function_definition
+    ident: (identifier)
+    params: (parameter_list
+      (typed_identifier
+        ident: (identifier)
+        type: (primitive_type)))
+    type: (primitive_type)
+    body: (block
+      (variable_definition
+        typed_ident: (typed_identifier
+          ident: (identifier)
+          type: (primitive_type))
+        expr: (identifier))
+      (return_statement
+        expr: (identifier)))))
+
+================================================================================
+Import and export definitions
+================================================================================
+
+import beam
+import foo [bar, baz,]
+import whiff [kebab, roth, ramage]
+export [bar]
+export [foo, whiff]
+export [
+  bar,
+  baz,
+  kebab,
+  ramage,
+]
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_definition
+    namespace: (identifier))
+  (import_definition
+    namespace: (identifier)
+    idents: (identifier)
+    idents: (identifier))
+  (import_definition
+    namespace: (identifier)
+    idents: (identifier)
+    idents: (identifier)
+    idents: (identifier))
+  (export_definition
+    idents: (identifier))
+  (export_definition
+    idents: (identifier)
+    idents: (identifier))
+  (export_definition
+    idents: (identifier)
+    idents: (identifier)
+    idents: (identifier)
+    idents: (identifier)))
