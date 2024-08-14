@@ -6,12 +6,9 @@ module.exports = grammar({
 
     _newline_token: $ => /\n|\r\n?/,
 
-    _eof: $ => /\Z/,
+    _eof: $ => '\0',
 
-    _block_start: $ => choice(
-      seq($._newline_token, /^/m),
-      /\A/m,
-    ),
+    _block_start: $ => $._newline_token,
 
     _block_close: $ => choice(
       $._newline_token,
@@ -32,7 +29,7 @@ module.exports = grammar({
     _raw: $ => /.+/,
 
     content: $ => repeat1(choice(
-      $.script,
+      $.scripting,
       $.heading,
       $.paragraph,
       $.ordered_list,
@@ -58,12 +55,12 @@ module.exports = grammar({
       seq('#######', field('content', $.content), '#######'),
     ),
 
-    script_content: $ => repeat(choice(
+    script_content: $ => repeat1(choice(
       $._raw,
       $.script_interpolation,
     )),
 
-    script: $ => $ => choice(
+    scripting: $ => choice(
       seq(      '<', field('content', $.script_content), '>'      ),
       seq(     '<<', field('content', $.script_content), '>>'     ),
       seq(    '<<<', field('content', $.script_content), '>>>'    ),
@@ -80,29 +77,30 @@ module.exports = grammar({
       $.inline_text,
       $.email_autolink,
       $.uri_autolink,
-      $.script,
+      $.scripting,
     )),
-
-    checkbox_done: $ => choice('[x]', '[X]'),
-    checkbox_empty: $ => '[ ]',
-    checkbox: $ => choice(
-      $.checkbox_done,
-      $.checkbox_empty,
-    ),
 
     /* BLOCKS
     ==========================================================================*/
 
     paragraph: $ => seq(
+      $._block_start,
       $.inline_content,
       $._block_close,
     ),
 
     heading: $ => seq(
       $._block_start,
-      field('token', $ => /=+/),
+      field('token', /=+/),
       field('content', $.inline_content),
       $._block_close,
+    ),
+
+    checkbox_done: $ => choice('[x]', '[X]'),
+    checkbox_empty: $ => '[ ]',
+    checkbox: $ => choice(
+      $.checkbox_done,
+      $.checkbox_empty,
     ),
 
     ordered_list_indicator: $ => /(\.+)|(\-+)/,
@@ -114,7 +112,7 @@ module.exports = grammar({
       field('content', $.inline_content),
       $._block_close,
     ),
-    ordered_list: $ => repeat($.ordered_list_item),
+    ordered_list: $ => repeat1($.ordered_list_item),
 
     unordered_list_indicator: $ => /\++/,
     unordered_list_item: $ => seq(
@@ -125,8 +123,13 @@ module.exports = grammar({
       field('content', $.inline_content),
       $._block_close,
     ),
-    unordered_list: $ => repeat($.unordered_list_item),
+    unordered_list: $ => repeat1($.unordered_list_item),
 
-    horizontal_rule: $ => /$-{3,}\n/,
+    horizontal_rule: $ => seq(
+      $._block_start,
+      /-{3,}/,
+      optional($._inline_whitespace),
+      $._block_close,
+    ),
   }
 });
