@@ -39,5 +39,6 @@
       "scope": "source.enkidoc",
       "injection-regex": "^enkidoc$"
     }
-  ]
+  ],
+  "main": "bindings/node"
 }
