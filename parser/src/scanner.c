@@ -28,12 +28,12 @@ static inline void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
 bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
   Scanner *scanner = (Scanner *)payload;
 
-  if (lexer->eof(lexer))             printf("scan <eof>\n");
-  else if (lexer->lookahead == '\n') printf("scan <newline>\n");
-  else                               printf("scan %c\n", lexer->lookahead);
+  // if (lexer->eof(lexer))             printf("scan <eof>\n");
+  // else if (lexer->lookahead == '\n') printf("scan <newline>\n");
+  // else                               printf("scan %c\n", lexer->lookahead);
 
   if (scanner->done) {
-    printf("DONE\n");
+    // printf("DONE\n");
     return false;
   }
 
@@ -44,7 +44,7 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
     lexer->mark_end(lexer);
     lexer->result_symbol = END_OF_FILE;
     scanner->done = true;
-    printf("eof\n");
+    // printf("eof\n");
     return true;
   }
 
@@ -73,7 +73,7 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
   // }
 
   if (c != ' ' && c != '\n' && c != '\t' && c != '\r') {
-    printf("FAIL\n");
+    // printf("FAIL\n");
     return false;
   }
 
@@ -109,13 +109,13 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
       if (valid_symbols[INDENT] && indent_length > current_indent_length) {
         array_push(&scanner->indents, indent_length);
         lexer->result_symbol = INDENT;
-        printf("indent\n");
+        // printf("indent\n");
         return true;
       }
       if (valid_symbols[DEDENT] && indent_length < current_indent_length) {
         array_pop(&scanner->indents);
         lexer->result_symbol = DEDENT;
-        printf("dedent\n");
+        // printf("dedent\n");
         return true;
       }
     }
@@ -125,7 +125,7 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
 }
 
 unsigned tree_sitter_enkidoc_external_scanner_serialize(void *payload, char *buffer) {
-  printf("SERIALIZE\n");
+  // printf("SERIALIZE\n");
   Scanner *scanner = (Scanner *)payload;
   size_t size = 0;
   buffer[size++] = scanner->done;
@@ -137,7 +137,7 @@ unsigned tree_sitter_enkidoc_external_scanner_serialize(void *payload, char *buf
 }
 
 void tree_sitter_enkidoc_external_scanner_deserialize(void *payload, const char *buffer, unsigned length) {
-  printf("DESERIALIZE\n");
+  // printf("DESERIALIZE\n");
   Scanner *scanner = (Scanner *)payload;
   scanner->done = false;
   array_delete(&scanner->indents);

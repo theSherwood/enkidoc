@@ -36,9 +36,9 @@ Paragraph 1
 Lorem ipsum
 --------------------------------------------------------------------------------
 (source_file
-  (block_list__
-    (block__
-      (paragraph__))))
+  (block_list
+    (block
+      (paragraph))))
 
 ================================================================================
 Paragraph 2
@@ -48,9 +48,9 @@ Lorem ipsum
 
 --------------------------------------------------------------------------------
 (source_file
-  (block_list__
-    (block__
-      (paragraph__))))
+  (block_list
+    (block
+      (paragraph))))
 
 ================================================================================
 Paragraph 3
@@ -62,9 +62,9 @@ consectetur adipiscing elit
 
 --------------------------------------------------------------------------------
 (source_file
-  (block_list__
-    (block__
-      (paragraph__))))
+  (block_list
+    (block
+      (paragraph))))
 
 ================================================================================
 Paragraph 4
@@ -79,13 +79,12 @@ Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium dolor
 At vero eos et
 accusamus et iusto
 odio dignissimos ducimus
-
 --------------------------------------------------------------------------------
 (source_file
-  (block_list__
-    (block__
-      (paragraph__))
-    (block__
-      (paragraph__))
-    (block__
-      (paragraph__))))
+  (block_list
+    (block
+      (paragraph))
+    (block
+      (paragraph))
+    (block
+      (paragraph))))
