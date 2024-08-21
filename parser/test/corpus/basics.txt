@@ -359,3 +359,169 @@ this is part of the item above
                              items: (ordered_list_item
                                       children: (ordered_list
                                                   items: (ordered_list_item)))))))))
+
+===============================================================================|
+Ordered List with depth 4
+===============================================================================|
+
++ a
+  + aa
+this is part of the item above
++ b
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 children: (ordered_list
+                             items: (ordered_list_item)))
+        items: (ordered_list_item)))))
+
+===============================================================================|
+Ordered List with depth 5
+===============================================================================|
+
++ a
+  + aa
+    + aaa
+      + aaaa
+        + aaaaa 
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 children: (ordered_list
+                             items: (ordered_list_item
+                                      children: (ordered_list
+                                                  items: (ordered_list_item
+                                                           children: (ordered_list
+                                                                       items: (ordered_list_item
+                                                                                children: (ordered_list
+                                                                                            items: (ordered_list_item)))))))))))))
+
+===============================================================================|
+Ordered List with depth 6
+===============================================================================|
+
++ a
+  + aa
+    + aaa
+      + aaaa
+        + aaaaa 
+  + ab
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 children: (ordered_list
+                             items: (ordered_list_item
+                                      children: (ordered_list
+                                                  items: (ordered_list_item
+                                                           children: (ordered_list
+                                                                       items: (ordered_list_item
+                                                                                children: (ordered_list
+                                                                                            items: (ordered_list_item)))))))
+                             items: (ordered_list_item)))))))
+
+===============================================================================|
+Ordered List with depth 7
+===============================================================================|
+
++ a
+  + aa
+    + aaa
+      + aaaa
+        + aaaaa
+
++ a
+  + aa
+    + aaa
+      + aaaa
+        + aaaaa
+this is part of the item above
+        
++ a
+  + aa
+    + aaa
+this is part of the item above
+      + aaaa
+        + aaaaa
+          this is part of the item above
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 children: (ordered_list
+                             items: (ordered_list_item
+                                      children: (ordered_list
+                                                  items: (ordered_list_item
+                                                           children: (ordered_list
+                                                                       items: (ordered_list_item
+                                                                                children: (ordered_list
+                                                                                            items: (ordered_list_item)))))))))))
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 children: (ordered_list
+                             items: (ordered_list_item
+                                      children: (ordered_list
+                                                  items: (ordered_list_item
+                                                           children: (ordered_list
+                                                                       items: (ordered_list_item
+                                                                                children: (ordered_list
+                                                                                            items: (ordered_list_item)))))))))))
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 children: (ordered_list
+                             items: (ordered_list_item
+                                      children: (ordered_list
+                                                  items: (ordered_list_item
+                                                           children: (ordered_list
+                                                                       items: (ordered_list_item
+                                                                                children: (ordered_list
+                                                                                            items: (ordered_list_item)))))))))))))
+
+===============================================================================|
+Ordered List with depth 8
+===============================================================================|
+
++ a
+  + aa
+    + aaa
+      + aaaa
+        + aaaaa 
+      + aaab
+    + aab
+  + ab
++ b
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 children: (ordered_list
+                             items: (ordered_list_item
+                                      children: (ordered_list
+                                                  items: (ordered_list_item
+                                                           children: (ordered_list
+                                                                       items: (ordered_list_item
+                                                                                children: (ordered_list
+                                                                                            items: (ordered_list_item)))
+                                                                       items: (ordered_list_item)))
+                                                  items: (ordered_list_item)))
+                             items: (ordered_list_item)))
+        items: (ordered_list_item)))))
