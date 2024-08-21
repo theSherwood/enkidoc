@@ -13,8 +13,8 @@ module.exports = grammar({
     // [$.ordered_list],
     // [$.unordered_list],
     // [$.block_list],
-    [$.source_file],
-    [$.paragraph],
+    // [$.source_file],
+    // [$.paragraph],
   ],
 
   extras: $ => [],
@@ -31,20 +31,13 @@ module.exports = grammar({
       $._eof,
     ),
     block: $ => seq(choice(
+        $.heading,
         $.paragraph,
       ),
       $._block_separator,
     ),
     block_list: $ => repeat1(
       $.block,
-    ),
-    paragraph: $ => seq(
-      $._inline_text,
-      optional(repeat1(seq(
-        $._newline_token,
-        $._inline_text,
-      ))),
-      optional($._newline_token),
     ),
     _inline_text: $ => /[^\n]*[^\s]+[^\n]*/,
     _inline_whitespace: $ => /[ \t]+/,
@@ -93,6 +86,8 @@ module.exports = grammar({
 
     // _inline_text: $ => /[^\n]+/,
 
+    _inline_content: $ => $._inline_text,
+
     // // TODO - _line_break
     // _inline_content: $ => repeat1(choice(
     //   prec(1, $._inline_text),
@@ -103,6 +98,31 @@ module.exports = grammar({
 
     /* BLOCKS
     ==========================================================================*/
+
+    paragraph: $ => seq(
+      field('content', seq(
+        $._inline_content,
+        optional(repeat1(seq(
+          $._newline_token,
+          $._inline_content,
+        ))),
+      )),
+      optional($._newline_token),
+    ),
+
+    heading: $ => seq(
+      field('token', token(prec(10, /={1,6}/))),
+      $._inline_whitespace,
+      field('content', seq(
+        $._inline_content,
+        optional(repeat1(seq(
+          $._newline_token,
+          $._inline_content,
+        ))),
+      )),
+      optional($._newline_token),
+    ),
+
 
     // paragraph: $ => seq(
     //   $._line_start,

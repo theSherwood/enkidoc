@@ -8,6 +8,10 @@
       "required": true,
       "types": [
         {
+          "type": "heading",
+          "named": true
+        },
+        {
           "type": "paragraph",
           "named": true
         }
@@ -28,6 +32,11 @@
         }
       ]
     }
+  },
+  {
+    "type": "heading",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "paragraph",

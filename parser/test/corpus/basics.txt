@@ -88,3 +88,48 @@ odio dignissimos ducimus
       (paragraph))
     (block
       (paragraph))))
+
+================================================================================
+Heading 1
+================================================================================
+= Simple heading
+--------------------------------------------------------------------------------
+(source_file
+  (block_list
+    (block
+      (heading))))
+
+================================================================================
+Heading 2
+================================================================================
+= Simple heading
+
+== Other heading
+
+== And another heading
+--------------------------------------------------------------------------------
+(source_file
+  (block_list
+    (block (heading))
+    (block (heading))
+    (block (heading))))
+
+================================================================================
+Heading 3
+================================================================================
+
+= Simple heading
+with additional stuff
+which is also part of the heading
+
+== Other heading
+and this one is similar
+
+====== And another heading
+
+--------------------------------------------------------------------------------
+(source_file
+  (block_list
+    (block (heading))
+    (block (heading))
+    (block (heading))))
