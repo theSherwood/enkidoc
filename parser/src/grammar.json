@@ -88,6 +88,10 @@
             },
             {
               "type": "SYMBOL",
+              "name": "horizontal_rule"
+            },
+            {
+              "type": "SYMBOL",
               "name": "paragraph"
             }
           ]
@@ -232,6 +236,35 @@
                 ]
               }
             ]
+          }
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_newline_token"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "_horizontal_rule_token": {
+      "type": "PATTERN",
+      "value": "\\-{3,80}"
+    },
+    "horizontal_rule": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "PREC",
+          "value": 10,
+          "content": {
+            "type": "SYMBOL",
+            "name": "_horizontal_rule_token"
           }
         },
         {

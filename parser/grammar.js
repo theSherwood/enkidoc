@@ -10,11 +10,6 @@ module.exports = grammar({
   ],
 
   conflicts: $ => [
-    // [$.ordered_list],
-    // [$.unordered_list],
-    // [$.block_list],
-    // [$.source_file],
-    // [$.paragraph],
   ],
 
   extras: $ => [],
@@ -32,6 +27,7 @@ module.exports = grammar({
     ),
     block: $ => seq(choice(
         $.heading,
+        $.horizontal_rule,
         $.paragraph,
       ),
       $._block_separator,
@@ -123,19 +119,11 @@ module.exports = grammar({
       optional($._newline_token),
     ),
 
+    horizontal_rule: $ => seq(
+      token(prec(10, /\-{3,80}/)),
+      optional($._newline_token),
+    )
 
-    // paragraph: $ => seq(
-    //   $._line_start,
-    //   $._inline_content,
-    //   $._line_end,
-    // ),
-
-    // heading: $ => seq(
-    //   $._line_start,
-    //   field('token', /=+/),
-    //   field('content', $._inline_content),
-    //   $._line_end,
-    // ),
 
     // checkbox_done: $ => choice('[x]', '[X]'),
     // checkbox_empty: $ => '[ ]',

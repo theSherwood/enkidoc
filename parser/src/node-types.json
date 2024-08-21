@@ -12,6 +12,10 @@
           "named": true
         },
         {
+          "type": "horizontal_rule",
+          "named": true
+        },
+        {
           "type": "paragraph",
           "named": true
         }
@@ -35,6 +39,11 @@
   },
   {
     "type": "heading",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "horizontal_rule",
     "named": true,
     "fields": {}
   },
