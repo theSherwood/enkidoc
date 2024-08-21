@@ -306,3 +306,56 @@ as is this line
       (ordered_list
         items: (ordered_list_item)
         items: (ordered_list_item)))))
+
+===============================================================================|
+Ordered List with depth 1
+===============================================================================|
++ a
+  + aa
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 children: (ordered_list
+                             items: (ordered_list_item)))))))
+
+===============================================================================|
+Ordered List with depth 2
+===============================================================================|
++ a
+this is part of the item above
+  + aa
+this is part of the item above
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 children: (ordered_list
+                             items: (ordered_list_item)))))))
+
+===============================================================================|
+Ordered List with depth 3
+===============================================================================|
++ a
+this is part of the item above
+  + aa
+this is part of the item above
+  + ab
+    + aba
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 children: (ordered_list
+                             items: (ordered_list_item)
+                             items: (ordered_list_item
+                                      children: (ordered_list
+                                                  items: (ordered_list_item)))))))))

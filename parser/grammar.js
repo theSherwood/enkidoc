@@ -7,7 +7,11 @@ module.exports = grammar({
     $._indent,
     $._dedent,
     $._eof,
+    $._first_ordered_list_token,
     $._next_ordered_list_token,
+    $._list_item_content_end,
+    $._list_item_content_cont,
+    $._DEBUG,
   ],
 
   conflicts: $ => [
@@ -130,17 +134,43 @@ module.exports = grammar({
 
     ordered_list_item: $ => seq(
       field('content', seq(
+        // /(.|\n)+?/,
         $._inline_content,
+        // $._DEBUG,
         optional(repeat1(seq(
+          $._list_item_content_cont,
           $._newline_token,
           $._inline_content,
-        ))),
+        )))
+        // $
+        // repeat1(choice(
+        //   prec(-1, seq(
+        //     $._newline_token,
+        //     $._inline_content,
+        //   )),
+        //   prec(10, $._list_item_content_end)
+        // )),
+        // choice(
+        // prec(-1, optional(repeat1(seq(
+        //   $._newline_token,
+        //   $._inline_content,
+        // )))),
+        // prec(10, $._list_item_content_end),
+        // ),
+        // $._list_item_content_end,
       )),
+      field('children', optional(seq(
+        $._indent,
+        $._newline_token,
+        $.ordered_list,
+        // $._dedent,
+      ))),
     ),
 
     ordered_list: $ => seq(
-      token(prec(10, '+')),
-      $._inline_whitespace,
+      // token(prec(10, '+')),
+      $._first_ordered_list_token,
+      // $._inline_whitespace,
       field('items', seq(
         $.ordered_list_item,
         optional(repeat1(seq(
@@ -150,6 +180,104 @@ module.exports = grammar({
       )),
       optional($._newline_token),
     )
+
+    /*
+
+===============================================================================|
+Ordered List 2
+===============================================================================|
+
++ item a
++ item b
++ item c
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item)
+        items: (ordered_list_item)
+        items: (ordered_list_item)))))
+
+===============================================================================|
+Ordered List 3
+===============================================================================|
+
++ item a
+this line is part of the list item above
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item)))))
+
+===============================================================================|
+Ordered List 4
+===============================================================================|
+
++ item a
+this line is part of the list item above
+as is this line
++ item b
+  same sort of thing
+  but with an
+  indented hard wrap
++ item c
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item)
+        items: (ordered_list_item)
+        items: (ordered_list_item)))))
+
+===============================================================================|
+Ordered List 5
+===============================================================================|
+
++ item a
+this line is part of the list item above
+as is this line
++ item b
+  same sort of thing
+  but with an
+  indented hard wrap
+
++ item c
++ item d
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item)
+        items: (ordered_list_item)))
+    (block
+      (ordered_list
+        items: (ordered_list_item)
+        items: (ordered_list_item)))))
+
+===============================================================================|
+Ordered List with depth 1
+===============================================================================|
++ a
+  + aa 
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 children: (ordered_list
+                             items: (ordered_list_item)))))))
+
+    */
 
     // checkbox_done: $ => choice('[x]', '[X]'),
     // checkbox_empty: $ => '[ ]',
