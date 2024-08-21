@@ -1,0 +1,386 @@
+===============================================================================|
+Ordered List 1
+===============================================================================|
++ item a
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 content: (inline_content (inline_text)))))))
+
+===============================================================================|
+Ordered List 2
+===============================================================================|
+
++ item a
++ item b
++ item c
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 content: (inline_content (inline_text)))
+        items: (ordered_list_item
+                 content: (inline_content (inline_text)))
+        items: (ordered_list_item
+                 content: (inline_content (inline_text)))))))
+
+===============================================================================|
+Ordered List 3
+===============================================================================|
+
++ item a
+this line is part of the list item above
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 content: (inline_content (inline_text))
+                 content: (inline_content (inline_text)))))))
+
+===============================================================================|
+Ordered List 4
+===============================================================================|
+
++ item a
+this line is part of the list item above
+as is this line
++ item b
+  same sort of thing
+  but with an
+  indented hard wrap
++ item c
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 content: (inline_content (inline_text))
+                 content: (inline_content (inline_text))
+                 content: (inline_content (inline_text)))
+        items: (ordered_list_item
+                 content: (inline_content (inline_text))
+                 content: (inline_content (inline_text))
+                 content: (inline_content (inline_text))
+                 content: (inline_content (inline_text)))
+        items: (ordered_list_item
+                 content: (inline_content (inline_text)))))))
+
+===============================================================================|
+Ordered List 5
+===============================================================================|
+
++ item a
+this line is part of the list item above
+as is this line
++ item b
+  same sort of thing
+  but with an
+  indented hard wrap
+
++ item c
++ item d
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 content: (inline_content (inline_text))
+                 content: (inline_content (inline_text))
+                 content: (inline_content (inline_text)))
+        items: (ordered_list_item
+                 content: (inline_content (inline_text))
+                 content: (inline_content (inline_text))
+                 content: (inline_content (inline_text))
+                 content: (inline_content (inline_text)))))
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 content: (inline_content (inline_text)))
+        items: (ordered_list_item
+                 content: (inline_content (inline_text)))))))
+
+===============================================================================|
+Ordered List with depth 1
+===============================================================================|
++ a
+  + aa
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 content: (inline_content (inline_text))
+                 children: (ordered_list
+                             items: (ordered_list_item
+                                      content: (inline_content (inline_text)))))))))
+
+===============================================================================|
+Ordered List with depth 2
+===============================================================================|
++ a
+this is part of the item above
+  + aa
+this is part of the item above
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 content: (inline_content (inline_text))
+                 content: (inline_content (inline_text))
+                 children: (ordered_list
+                             items: (ordered_list_item
+                                      content: (inline_content (inline_text))
+                                      content: (inline_content (inline_text)))))))))
+
+===============================================================================|
+Ordered List with depth 3
+===============================================================================|
++ a
+this is part of the item above
+  + aa
+this is part of the item above
+  + ab
+    + aba
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 content: (inline_content (inline_text))
+                 content: (inline_content (inline_text))
+                 children: (ordered_list
+                             items: (ordered_list_item
+                                      content: (inline_content (inline_text))
+                                      content: (inline_content (inline_text)))
+                             items: (ordered_list_item
+                                      content: (inline_content (inline_text))
+                                      children: (ordered_list
+                                                  items: (ordered_list_item
+                                                           content: (inline_content (inline_text)))))))))))
+
+===============================================================================|
+Ordered List with depth 4
+===============================================================================|
+
++ a
+  + aa
+this is part of the item above
++ b
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 content: (inline_content (inline_text))
+                 children: (ordered_list
+                             items: (ordered_list_item
+                                      content: (inline_content (inline_text))
+                                      content: (inline_content (inline_text)))))
+        items: (ordered_list_item
+                 content: (inline_content (inline_text)))))))
+
+===============================================================================|
+Ordered List with depth 5
+===============================================================================|
+
++ a
+  + aa
+    + aaa
+      + aaaa
+        + aaaaa 
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 content: (inline_content (inline_text))
+                 children: (ordered_list
+                             items: (ordered_list_item
+                                      content: (inline_content (inline_text))
+                                      children: (ordered_list
+                                                  items: (ordered_list_item
+                                                           content: (inline_content (inline_text))
+                                                           children: (ordered_list
+                                                                       items: (ordered_list_item
+                                                                                content: (inline_content (inline_text))
+                                                                                children: (ordered_list
+                                                                                            items: (ordered_list_item
+                                                                                                     content: (inline_content (inline_text)))))))))))))))
+
+===============================================================================|
+Ordered List with depth 6
+===============================================================================|
+
++ a
+  + aa
+    + aaa
+      + aaaa
+        + aaaaa 
+  + ab
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 content: (inline_content (inline_text))
+                 children: (ordered_list
+                             items: (ordered_list_item
+                                      content: (inline_content (inline_text))
+                                      children: (ordered_list
+                                                  items: (ordered_list_item
+                                                           content: (inline_content (inline_text))
+                                                           children: (ordered_list
+                                                                       items: (ordered_list_item
+                                                                                content: (inline_content (inline_text))
+                                                                                children: (ordered_list
+                                                                                            items: (ordered_list_item
+                                                                                                     content: (inline_content (inline_text)))))))))
+                             items: (ordered_list_item
+                                      content: (inline_content (inline_text)))))))))
+
+===============================================================================|
+Ordered List with depth 7
+===============================================================================|
+
++ a
+  + aa
+    + aaa
+      + aaaa
+        + aaaaa
+
++ a
+  + aa
+    + aaa
+      + aaaa
+        + aaaaa
+this is part of the item above
+        
++ a
+  + aa
+    + aaa
+this is part of the item above
+      + aaaa
+        + aaaaa
+          this is part of the item above
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 content: (inline_content (inline_text))
+                 children: (ordered_list
+                             items: (ordered_list_item
+                                      content: (inline_content (inline_text))
+                                      children: (ordered_list
+                                                  items: (ordered_list_item
+                                                           content: (inline_content (inline_text))
+                                                           children: (ordered_list
+                                                                       items: (ordered_list_item
+                                                                                content: (inline_content (inline_text))
+                                                                                children: (ordered_list
+                                                                                            items: (ordered_list_item
+                                                                                                     content: (inline_content (inline_text)))))))))))))
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 content: (inline_content (inline_text))
+                 children: (ordered_list
+                             items: (ordered_list_item
+                                      content: (inline_content (inline_text))
+                                      children: (ordered_list
+                                                  items: (ordered_list_item
+                                                           content: (inline_content (inline_text))
+                                                           children: (ordered_list
+                                                                       items: (ordered_list_item
+                                                                                content: (inline_content (inline_text))
+                                                                                children: (ordered_list
+                                                                                            items: (ordered_list_item
+                                                                                                     content: (inline_content (inline_text))
+                                                                                                     content: (inline_content (inline_text)))))))))))))
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 content: (inline_content (inline_text))
+                 children: (ordered_list
+                             items: (ordered_list_item
+                                      content: (inline_content (inline_text))
+                                      children: (ordered_list
+                                                  items: (ordered_list_item
+                                                           content: (inline_content (inline_text))
+                                                           content: (inline_content (inline_text))
+                                                           children: (ordered_list
+                                                                       items: (ordered_list_item
+                                                                                content: (inline_content (inline_text))
+                                                                                children: (ordered_list
+                                                                                            items: (ordered_list_item
+                                                                                                     content: (inline_content (inline_text))
+                                                                                                     content: (inline_content (inline_text)))))))))))))))
+
+===============================================================================|
+Ordered List with depth 8
+===============================================================================|
+
++ a
+  + aa
+    + aaa
+      + aaaa
+        + aaaaa 
+      + aaab
+    + aab
+  + ab
++ b
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item
+                 content: (inline_content (inline_text))
+                 children: (ordered_list
+                             items: (ordered_list_item
+                                      content: (inline_content (inline_text))
+                                      children: (ordered_list
+                                                  items: (ordered_list_item
+                                                           content: (inline_content (inline_text))
+                                                           children: (ordered_list
+                                                                       items: (ordered_list_item
+                                                                                content: (inline_content (inline_text))
+                                                                                children: (ordered_list
+                                                                                            items: (ordered_list_item
+                                                                                                     content: (inline_content (inline_text)))))
+                                                                       items: (ordered_list_item
+                                                                                content: (inline_content (inline_text)))))
+                                                  items: (ordered_list_item
+                                                           content: (inline_content (inline_text)))))
+                             items: (ordered_list_item
+                                      content: (inline_content (inline_text)))))
+        items: (ordered_list_item
+                 content: (inline_content (inline_text)))))))

@@ -33,17 +33,18 @@ module.exports = grammar({
       $._eof,
     ),
     block: $ => seq(choice(
+        $.paragraph,
         $.heading,
         $.horizontal_rule,
         $.ordered_list,
-        $.paragraph,
+        seq($.scripting, optional($._newline_token)),
       ),
       $._block_separator,
     ),
     block_list: $ => repeat1(
       $.block,
     ),
-    _inline_text: $ => /[^\n]*[^\s]+[^\n]*/,
+    inline_text: $ => /[^\n]*[^\s]+[^\n]*/,
     _inline_whitespace: $ => /[ \t]+/,
 
     _newline_token: $ => /\n|\r\n?/,
@@ -51,52 +52,48 @@ module.exports = grammar({
     /* INLINE
     ==========================================================================*/
 
-    // _raw: $ => /(.|\n)+/,
+    _raw: $ => /(.|\n)+/,
 
     // https://github.github.com/gfm/#autolinks
     uri_autolink: $ => /<[a-zA-Z][a-zA-Z0-9+\.\-][a-zA-Z0-9+\.\-]*:[^ \t\r\n<>]*>/,
     email_autolink: $ => /<[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*>/,
 
-    // script_interpolation: $ => choice(
-    //   seq(      '#', field('content', $.block_list), '#'      ),
-    //   seq(     '##', field('content', $.block_list), '##'     ),
-    //   seq(    '###', field('content', $.block_list), '###'    ),
-    //   seq(   '####', field('content', $.block_list), '####'   ),
-    //   seq(  '#####', field('content', $.block_list), '#####'  ),
-    //   seq( '######', field('content', $.block_list), '######' ),
-    //   seq('#######', field('content', $.block_list), '#######'),
-    // ),
+    script_interpolation: $ => choice(
+      seq(      '#', field('content', $.block_list), '#'      ),
+      seq(     '##', field('content', $.block_list), '##'     ),
+      seq(    '###', field('content', $.block_list), '###'    ),
+      seq(   '####', field('content', $.block_list), '####'   ),
+      seq(  '#####', field('content', $.block_list), '#####'  ),
+      seq( '######', field('content', $.block_list), '######' ),
+      seq('#######', field('content', $.block_list), '#######'),
+    ),
 
-    // script_content: $ => repeat1(choice(
-    //   $._raw,
-    //   $.script_interpolation,
-    // )),
+    script_content: $ => repeat1(choice(
+      $._raw,
+      $.script_interpolation,
+    )),
 
-    // scripting: $ => seq(
-    //   '<<<',
-    //   choice(
-    //                    field('content', $.script_content),
-    //     seq(      '<', field('content', $.script_content), '>'      ),
-    //     seq(     '<<', field('content', $.script_content), '>>'     ),
-    //     seq(    '<<<', field('content', $.script_content), '>>>'    ),
-    //     seq(   '<<<<', field('content', $.script_content), '>>>>'   ),
-    //     seq(  '<<<<<', field('content', $.script_content), '>>>>>'  ),
-    //     seq( '<<<<<<', field('content', $.script_content), '>>>>>>' ),
-    //     seq('<<<<<<<', field('content', $.script_content), '>>>>>>>'),
-    //   ),
-    //   '>>>'
-    // ),
-
-    // _inline_text: $ => /[^\n]+/,
-
-    // _inline_content: $ => $._inline_text,
+    scripting: $ => seq(
+      token(prec(10, '<<<')),
+      choice(
+                       field('content', $.script_content),
+        seq(      '<', field('content', $.script_content), '>'      ),
+        seq(     '<<', field('content', $.script_content), '>>'     ),
+        seq(    '<<<', field('content', $.script_content), '>>>'    ),
+        seq(   '<<<<', field('content', $.script_content), '>>>>'   ),
+        seq(  '<<<<<', field('content', $.script_content), '>>>>>'  ),
+        seq( '<<<<<<', field('content', $.script_content), '>>>>>>' ),
+        seq('<<<<<<<', field('content', $.script_content), '>>>>>>>'),
+      ),
+      '>>>'
+    ),
 
     // // TODO - _line_break
-    _inline_content: $ => repeat1(choice(
-      prec(1, $._inline_text),
-      prec(1, $.email_autolink),
-      prec(1, $.uri_autolink),
-      // prec(1, $.scripting),
+    inline_content: $ => repeat1(choice(
+      prec.left(-1, $.inline_text),
+      prec.left(10, $.email_autolink),
+      prec.left(10, $.uri_autolink),
+      prec.left(10, $.scripting),
     )),
 
     /* BLOCKS
@@ -104,10 +101,10 @@ module.exports = grammar({
 
     paragraph: $ => seq(
       field('content', seq(
-        $._inline_content,
+        $.inline_content,
         optional(repeat1(seq(
           $._newline_token,
-          $._inline_content,
+          $.inline_content,
         ))),
       )),
       optional($._newline_token),
@@ -117,10 +114,10 @@ module.exports = grammar({
       field('token', token(prec(10, /={1,6}/))),
       $._inline_whitespace,
       field('content', seq(
-        $._inline_content,
+        $.inline_content,
         optional(repeat1(seq(
           $._newline_token,
-          $._inline_content,
+          $.inline_content,
         ))),
       )),
       optional($._newline_token),
@@ -132,12 +129,16 @@ module.exports = grammar({
     ),
 
     ordered_list_item: $ => seq(
+      field('checkbox', optional(seq(
+        $.checkbox,
+        $._inline_whitespace,
+      ))),
       field('content', seq(
-        $._inline_content,
+        $.inline_content,
         optional(repeat1(seq(
           $._list_item_content_cont,
           $._newline_token,
-          $._inline_content,
+          $.inline_content,
         )))
       )),
       field('children', optional(seq(
@@ -158,36 +159,21 @@ module.exports = grammar({
         ))),
       )),
       optional($._newline_token),
-    )
+    ),
 
-    // checkbox_done: $ => choice('[x]', '[X]'),
-    // checkbox_empty: $ => '[ ]',
-    // checkbox: $ => choice(
-    //   $.checkbox_done,
-    //   $.checkbox_empty,
-    // ),
-
-    // ordered_list_item: $ => seq(
-    //   $._line_start,
-    //   '+',
-    //   $._inline_whitespace,
-    //   field('checkbox', optional(seq($.checkbox, $._inline_whitespace))),
-    //   field('content', $._inline_content),
-    //   // field('children', optional(seq(
-    //   //   $._indent,
-    //   //   choice($.ordered_list, $.unordered_list),
-    //   //   $._dedent,
-    //   // ))),
-    //   $._line_end,
-    // ),
-    // ordered_list: $ => repeat1(prec(10, $.ordered_list_item)),
+    checkbox_done: $ => choice('[x]', '[X]'),
+    checkbox_empty: $ => '[ ]',
+    checkbox: $ => choice(
+      $.checkbox_done,
+      $.checkbox_empty,
+    ),
 
     // unordered_list_item: $ => seq(
     //   $._line_start,
     //   '-',
     //   $._inline_whitespace,
     //   field('checkbox', optional(seq($.checkbox, $._inline_whitespace))),
-    //   field('content', $._inline_content),
+    //   field('content', $.inline_content),
     //   // field('children', optional(seq(
     //   //   $._indent,
     //   //   choice($.ordered_list, $.unordered_list),
@@ -199,13 +185,6 @@ module.exports = grammar({
     //   repeat1(
     //     prec(10, $.unordered_list_item)
     //   ),
-    // ),
-
-    // horizontal_rule: $ => seq(
-    //   $._line_start,
-    //   /-{3,}/,
-    //   optional($._inline_whitespace),
-    //   $._line_end,
     // ),
   }
 });

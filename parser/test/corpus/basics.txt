@@ -37,8 +37,7 @@ Lorem ipsum
 -------------------------------------------------------------------------------|
 (source_file
   (block_list
-    (block
-      (paragraph))))
+    (block (paragraph (inline_content (inline_text))))))
 
 ===============================================================================|
 Paragraph 2
@@ -49,8 +48,7 @@ Lorem ipsum
 -------------------------------------------------------------------------------|
 (source_file
   (block_list
-    (block
-      (paragraph))))
+    (block (paragraph (inline_content (inline_text))))))
 
 ===============================================================================|
 Paragraph 3
@@ -63,8 +61,9 @@ consectetur adipiscing elit
 -------------------------------------------------------------------------------|
 (source_file
   (block_list
-    (block
-      (paragraph))))
+    (block (paragraph (inline_content (inline_text))
+                      (inline_content (inline_text))
+                      (inline_content (inline_text))))))
 
 ===============================================================================|
 Paragraph 4
@@ -82,12 +81,13 @@ odio dignissimos ducimus
 -------------------------------------------------------------------------------|
 (source_file
   (block_list
-    (block
-      (paragraph))
-    (block
-      (paragraph))
-    (block
-      (paragraph))))
+    (block (paragraph (inline_content (inline_text))
+                      (inline_content (inline_text))
+                      (inline_content (inline_text))))
+    (block (paragraph (inline_content (inline_text))))
+    (block (paragraph (inline_content (inline_text))
+                      (inline_content (inline_text))
+                      (inline_content (inline_text))))))
 
 ===============================================================================|
 Heading 1
@@ -96,8 +96,7 @@ Heading 1
 -------------------------------------------------------------------------------|
 (source_file
   (block_list
-    (block
-      (heading))))
+    (block (heading (inline_content (inline_text))))))
 
 ===============================================================================|
 Heading 2
@@ -110,9 +109,9 @@ Heading 2
 -------------------------------------------------------------------------------|
 (source_file
   (block_list
-    (block (heading))
-    (block (heading))
-    (block (heading))))
+    (block (heading (inline_content (inline_text))))
+    (block (heading (inline_content (inline_text))))
+    (block (heading (inline_content (inline_text))))))
 
 ===============================================================================|
 Heading 3
@@ -133,9 +132,13 @@ and this one is similar
 -------------------------------------------------------------------------------|
 (source_file
   (block_list
-    (block (heading))
-    (block (heading))
-    (block (heading))))
+    (block (heading (inline_content (inline_text))
+                    (inline_content (inline_text))
+                    (inline_content (inline_text))))
+    (block (heading (inline_content (inline_text))
+                    (inline_content (inline_text))))
+    (block (heading (inline_content (inline_text))
+                    (inline_content (inline_text))))))
 
 ===============================================================================|
 Headings and Paragraphs
@@ -176,16 +179,21 @@ And another
 -------------------------------------------------------------------------------|
 (source_file
   (block_list
-    (block (heading))
-    (block (paragraph))
-    (block (paragraph))
-    (block (paragraph))
-    (block (heading))
-    (block (paragraph))
-    (block (paragraph))
-    (block (heading))
-    (block (paragraph))
-    (block (paragraph))))
+    (block (heading (inline_content (inline_text))
+                    (inline_content (inline_text))
+                    (inline_content (inline_text))))
+    (block (paragraph (inline_content (inline_text))
+                      (inline_content (inline_text))))
+    (block (paragraph (inline_content (inline_text))))
+    (block (paragraph (inline_content (inline_text))))
+    (block (heading (inline_content (inline_text))
+                    (inline_content (inline_text))))
+    (block (paragraph (inline_content (inline_text))))
+    (block (paragraph (inline_content (inline_text))))
+    (block (heading (inline_content (inline_text))
+                    (inline_content (inline_text))))
+    (block (paragraph (inline_content (inline_text))))
+    (block (paragraph (inline_content (inline_text))))))
 
 ===============================================================================|
 Horizontal Rule 1
@@ -217,311 +225,10 @@ Horizontal Rule 2
     (block (horizontal_rule))))
 
 ===============================================================================|
-Ordered List 1
-===============================================================================|
-+ item a
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item)))))
-
-===============================================================================|
-Ordered List 2
+Scripting
 ===============================================================================|
 
-+ item a
-+ item b
-+ item c
+== 1 + 2 = <<<1 + 2>>>
 
 -------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item)
-        items: (ordered_list_item)
-        items: (ordered_list_item)))))
-
-===============================================================================|
-Ordered List 3
-===============================================================================|
-
-+ item a
-this line is part of the list item above
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item)))))
-
-===============================================================================|
-Ordered List 4
-===============================================================================|
-
-+ item a
-this line is part of the list item above
-as is this line
-+ item b
-  same sort of thing
-  but with an
-  indented hard wrap
-+ item c
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item)
-        items: (ordered_list_item)
-        items: (ordered_list_item)))))
-
-===============================================================================|
-Ordered List 5
-===============================================================================|
-
-+ item a
-this line is part of the list item above
-as is this line
-+ item b
-  same sort of thing
-  but with an
-  indented hard wrap
-
-+ item c
-+ item d
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item)
-        items: (ordered_list_item)))
-    (block
-      (ordered_list
-        items: (ordered_list_item)
-        items: (ordered_list_item)))))
-
-===============================================================================|
-Ordered List with depth 1
-===============================================================================|
-+ a
-  + aa
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item
-                 children: (ordered_list
-                             items: (ordered_list_item)))))))
-
-===============================================================================|
-Ordered List with depth 2
-===============================================================================|
-+ a
-this is part of the item above
-  + aa
-this is part of the item above
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item
-                 children: (ordered_list
-                             items: (ordered_list_item)))))))
-
-===============================================================================|
-Ordered List with depth 3
-===============================================================================|
-+ a
-this is part of the item above
-  + aa
-this is part of the item above
-  + ab
-    + aba
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item
-                 children: (ordered_list
-                             items: (ordered_list_item)
-                             items: (ordered_list_item
-                                      children: (ordered_list
-                                                  items: (ordered_list_item)))))))))
-
-===============================================================================|
-Ordered List with depth 4
-===============================================================================|
-
-+ a
-  + aa
-this is part of the item above
-+ b
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item
-                 children: (ordered_list
-                             items: (ordered_list_item)))
-        items: (ordered_list_item)))))
-
-===============================================================================|
-Ordered List with depth 5
-===============================================================================|
-
-+ a
-  + aa
-    + aaa
-      + aaaa
-        + aaaaa 
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item
-                 children: (ordered_list
-                             items: (ordered_list_item
-                                      children: (ordered_list
-                                                  items: (ordered_list_item
-                                                           children: (ordered_list
-                                                                       items: (ordered_list_item
-                                                                                children: (ordered_list
-                                                                                            items: (ordered_list_item)))))))))))))
-
-===============================================================================|
-Ordered List with depth 6
-===============================================================================|
-
-+ a
-  + aa
-    + aaa
-      + aaaa
-        + aaaaa 
-  + ab
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item
-                 children: (ordered_list
-                             items: (ordered_list_item
-                                      children: (ordered_list
-                                                  items: (ordered_list_item
-                                                           children: (ordered_list
-                                                                       items: (ordered_list_item
-                                                                                children: (ordered_list
-                                                                                            items: (ordered_list_item)))))))
-                             items: (ordered_list_item)))))))
-
-===============================================================================|
-Ordered List with depth 7
-===============================================================================|
-
-+ a
-  + aa
-    + aaa
-      + aaaa
-        + aaaaa
-
-+ a
-  + aa
-    + aaa
-      + aaaa
-        + aaaaa
-this is part of the item above
-        
-+ a
-  + aa
-    + aaa
-this is part of the item above
-      + aaaa
-        + aaaaa
-          this is part of the item above
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item
-                 children: (ordered_list
-                             items: (ordered_list_item
-                                      children: (ordered_list
-                                                  items: (ordered_list_item
-                                                           children: (ordered_list
-                                                                       items: (ordered_list_item
-                                                                                children: (ordered_list
-                                                                                            items: (ordered_list_item)))))))))))
-    (block
-      (ordered_list
-        items: (ordered_list_item
-                 children: (ordered_list
-                             items: (ordered_list_item
-                                      children: (ordered_list
-                                                  items: (ordered_list_item
-                                                           children: (ordered_list
-                                                                       items: (ordered_list_item
-                                                                                children: (ordered_list
-                                                                                            items: (ordered_list_item)))))))))))
-    (block
-      (ordered_list
-        items: (ordered_list_item
-                 children: (ordered_list
-                             items: (ordered_list_item
-                                      children: (ordered_list
-                                                  items: (ordered_list_item
-                                                           children: (ordered_list
-                                                                       items: (ordered_list_item
-                                                                                children: (ordered_list
-                                                                                            items: (ordered_list_item)))))))))))))
-
-===============================================================================|
-Ordered List with depth 8
-===============================================================================|
-
-+ a
-  + aa
-    + aaa
-      + aaaa
-        + aaaaa 
-      + aaab
-    + aab
-  + ab
-+ b
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item
-                 children: (ordered_list
-                             items: (ordered_list_item
-                                      children: (ordered_list
-                                                  items: (ordered_list_item
-                                                           children: (ordered_list
-                                                                       items: (ordered_list_item
-                                                                                children: (ordered_list
-                                                                                            items: (ordered_list_item)))
-                                                                       items: (ordered_list_item)))
-                                                  items: (ordered_list_item)))
-                             items: (ordered_list_item)))
-        items: (ordered_list_item)))))
+(source_file)
