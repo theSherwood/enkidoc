@@ -16,6 +16,10 @@
           "named": true
         },
         {
+          "type": "ordered_list",
+          "named": true
+        },
+        {
           "type": "paragraph",
           "named": true
         }
@@ -48,6 +52,27 @@
     "fields": {}
   },
   {
+    "type": "ordered_list",
+    "named": true,
+    "fields": {
+      "items": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "ordered_list_item",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "ordered_list_item",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "paragraph",
     "named": true,
     "fields": {}
@@ -66,5 +91,9 @@
         }
       ]
     }
+  },
+  {
+    "type": "+",
+    "named": false
   }
 ]

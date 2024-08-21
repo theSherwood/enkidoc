@@ -7,9 +7,12 @@ module.exports = grammar({
     $._indent,
     $._dedent,
     $._eof,
+    $._next_ordered_list_token,
   ],
 
   conflicts: $ => [
+    [$.ordered_list_item],
+    [$.ordered_list],
   ],
 
   extras: $ => [],
@@ -28,6 +31,7 @@ module.exports = grammar({
     block: $ => seq(choice(
         $.heading,
         $.horizontal_rule,
+        $.ordered_list,
         $.paragraph,
       ),
       $._block_separator,
@@ -122,8 +126,30 @@ module.exports = grammar({
     horizontal_rule: $ => seq(
       token(prec(10, /\-{3,80}/)),
       optional($._newline_token),
-    )
+    ),
 
+    ordered_list_item: $ => seq(
+      field('content', seq(
+        $._inline_content,
+        optional(repeat1(seq(
+          $._newline_token,
+          $._inline_content,
+        ))),
+      )),
+    ),
+
+    ordered_list: $ => seq(
+      token(prec(10, '+')),
+      $._inline_whitespace,
+      field('items', seq(
+        $.ordered_list_item,
+        optional(repeat1(seq(
+          $._next_ordered_list_token,
+          $.ordered_list_item,
+        ))),
+      )),
+      optional($._newline_token),
+    )
 
     // checkbox_done: $ => choice('[x]', '[X]'),
     // checkbox_empty: $ => '[ ]',

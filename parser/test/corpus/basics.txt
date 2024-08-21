@@ -215,3 +215,94 @@ Horizontal Rule 2
     (block (horizontal_rule))
     (block (horizontal_rule))
     (block (horizontal_rule))))
+
+===============================================================================|
+Ordered List 1
+===============================================================================|
++ item a
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item)))))
+
+===============================================================================|
+Ordered List 2
+===============================================================================|
+
++ item a
++ item b
++ item c
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item)
+        items: (ordered_list_item)
+        items: (ordered_list_item)))))
+
+===============================================================================|
+Ordered List 3
+===============================================================================|
+
++ item a
+this line is part of the list item above
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item)))))
+
+===============================================================================|
+Ordered List 4
+===============================================================================|
+
++ item a
+this line is part of the list item above
+as is this line
++ item b
+  same sort of thing
+  but with an
+  indented hard wrap
++ item c
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item)
+        items: (ordered_list_item)
+        items: (ordered_list_item)))))
+
+===============================================================================|
+Ordered List 5
+===============================================================================|
+
++ item a
+this line is part of the list item above
+as is this line
++ item b
+  same sort of thing
+  but with an
+  indented hard wrap
+
++ item c
++ item d
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (ordered_list
+        items: (ordered_list_item)
+        items: (ordered_list_item)))
+    (block
+      (ordered_list
+        items: (ordered_list_item)
+        items: (ordered_list_item)))))

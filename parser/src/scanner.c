@@ -14,6 +14,7 @@ enum TokenType {
   INDENT,
   DEDENT,
   END_OF_FILE,
+  NEXT_ORDERED_LIST_TOKEN,
 };
 
 typedef struct {
@@ -48,6 +49,22 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
     return true;
   }
 
+  if (valid_symbols[NEXT_ORDERED_LIST_TOKEN]) {
+    if (c == '\n') {
+      skip(lexer);
+      if (lexer->lookahead == '+') {
+        skip(lexer);
+        if (lexer->lookahead == ' ' || lexer->lookahead == '\t') {
+          lexer->mark_end(lexer);
+          lexer->result_symbol = NEXT_ORDERED_LIST_TOKEN;
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+
   // if (valid_symbols[LINE_START] && lexer->get_column(lexer) == 0) {
   //   printf("line_start\n");
   //   lexer->result_symbol = LINE_START;
@@ -77,49 +94,49 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
     return false;
   }
 
-  bool found_end_of_line = false;
-  uint32_t indent_length = 0;
-  int32_t first_comment_indent_length = -1;
-  for (;;) {
-      if (lexer->lookahead == '\n') {
-          found_end_of_line = true;
-          indent_length = 0;
-          skip(lexer);
-      } else if (lexer->lookahead == ' ') {
-          indent_length++;
-          skip(lexer);
-      } else if (lexer->lookahead == '\r' || lexer->lookahead == '\f') {
-          indent_length = 0;
-          skip(lexer);
-      } else if (lexer->lookahead == '\t') {
-          indent_length += 8;
-          skip(lexer);
-      } else if (lexer->eof(lexer)) {
-          indent_length = 0;
-          found_end_of_line = true;
-          break;
-      } else {
-          break;
-      }
-  }
+  // bool found_end_of_line = false;
+  // uint32_t indent_length = 0;
+  // int32_t first_comment_indent_length = -1;
+  // for (;;) {
+  //     if (lexer->lookahead == '\n') {
+  //         found_end_of_line = true;
+  //         indent_length = 0;
+  //         skip(lexer);
+  //     } else if (lexer->lookahead == ' ') {
+  //         indent_length++;
+  //         skip(lexer);
+  //     } else if (lexer->lookahead == '\r' || lexer->lookahead == '\f') {
+  //         indent_length = 0;
+  //         skip(lexer);
+  //     } else if (lexer->lookahead == '\t') {
+  //         indent_length += 8;
+  //         skip(lexer);
+  //     } else if (lexer->eof(lexer)) {
+  //         indent_length = 0;
+  //         found_end_of_line = true;
+  //         break;
+  //     } else {
+  //         break;
+  //     }
+  // }
 
-  if (found_end_of_line) {
-    if (scanner->indents.size > 0) {
-      uint16_t current_indent_length = *array_back(&scanner->indents);
-      if (valid_symbols[INDENT] && indent_length > current_indent_length) {
-        array_push(&scanner->indents, indent_length);
-        lexer->result_symbol = INDENT;
-        // printf("indent\n");
-        return true;
-      }
-      if (valid_symbols[DEDENT] && indent_length < current_indent_length) {
-        array_pop(&scanner->indents);
-        lexer->result_symbol = DEDENT;
-        // printf("dedent\n");
-        return true;
-      }
-    }
-  }
+  // if (found_end_of_line) {
+  //   if (scanner->indents.size > 0) {
+  //     uint16_t current_indent_length = *array_back(&scanner->indents);
+  //     if (valid_symbols[INDENT] && indent_length > current_indent_length) {
+  //       array_push(&scanner->indents, indent_length);
+  //       lexer->result_symbol = INDENT;
+  //       // printf("indent\n");
+  //       return true;
+  //     }
+  //     if (valid_symbols[DEDENT] && indent_length < current_indent_length) {
+  //       array_pop(&scanner->indents);
+  //       lexer->result_symbol = DEDENT;
+  //       // printf("dedent\n");
+  //       return true;
+  //     }
+  //   }
+  // }
 
   return false;
 }
