@@ -16,8 +16,6 @@ module.exports = grammar({
   name: 'enkidoc',
 
   externals: $ => [
-    $._line_start,
-    $._line_end,
     $._indent,
     $._dedent,
     $._eof,
@@ -27,11 +25,14 @@ module.exports = grammar({
     $._list_item_content_end,
     $._non_blank_line,
     $._inline_content_end,
+    $._script_open,
+    $._script_close,
+    $._script_interpolation_open,
+    $._script_interpolation_close,
     $._DEBUG,
   ],
 
   conflicts: $ => [
-    [$.script_interpolation, $.paragraph]
   ],
 
   extras: $ => [],
@@ -48,7 +49,7 @@ module.exports = grammar({
       $._eof,
     ),
     block: $ => choice(
-      $.paragraph,
+      prec(-1, $.paragraph),
       $.heading,
       $.horizontal_rule,
       $.ordered_list,
@@ -59,7 +60,7 @@ module.exports = grammar({
       $._block_separator,
     )),
     // inline_text: $ => /[^\n]*[^\s]+[^\n]*/,
-    inline_text: $ => prec(10, repeat1(prec(10, $._text_base))),
+    inline_text: $ => prec(10, repeat1($._text_base)),
     _inline_whitespace: $ => /[ \t]+/,
 
     _newline_token: $ => /\n|\r\n?/,
@@ -87,7 +88,7 @@ module.exports = grammar({
 
     _text_base: $ => choice(
       // /[^\n]*[^\s]+[^\n]*/,
-      /[A-Za-z \t=.,:;'"+\-]+/,
+      /[A-Za-z \t=.,:;'"+\->]+/,
       // /[=.+\-]/,
       $._word,
       $._whitespace,
@@ -97,6 +98,7 @@ module.exports = grammar({
       /\\\}{2,}/,    // escaped double+ curlies close
       /\\\[{2,}/,    // escaped double+ brackets
       /\\\]{2,}/,    // escaped double+ brackets close
+      prec(-1, /#+/),
       // punctuation_without($, ['[', ']', '{', '}', '$', '<']),
       // '<!--',
       // /<![A-Z]+/,
@@ -119,9 +121,9 @@ module.exports = grammar({
     email_autolink: $ => /<[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*>/,
 
     script_interpolation: $ => seq(
-      '##', field('content', $._interpolated_block_list), '##',
-      // '##', field('content', repeat1(choice($.block))), '##',
-      // '##', field('content', $.block_list), $._DEBUG, '##',
+      prec(10, $._script_interpolation_open),
+      field('content', $._interpolated_block_list),
+      $._script_interpolation_close,
     ),
 
     script_content: $ => repeat1(choice(
@@ -130,7 +132,9 @@ module.exports = grammar({
     )),
 
     scripting: $ => seq(
-      '<<<', $.script_content, '>>>'
+      prec(10, $._script_open),
+      $.script_content,
+      $._script_close,
     ),
 
     // // TODO - _line_break

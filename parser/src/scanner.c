@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define VERBOSE 1
+#define VERBOSE 0
 
 // Print the result symbol and return the bool
 #define result(x) {                              \
@@ -22,8 +22,6 @@
 // https://github.com/tree-sitter/tree-sitter-python/blob/master/src/scanner.c
 
 enum TokenType {
-  LINE_START,
-  LINE_END,
   INDENT,
   DEDENT,
   END_OF_FILE,
@@ -33,17 +31,20 @@ enum TokenType {
   LIST_ITEM_CONTENT_END,
   NON_BLANK_LINE,
   INLINE_CONTENT_END,
-  // SCRIPT_OPEN,
-  // SCRIPT_CLOSE,
-  // SCRIPT_INTERPOLATION_OPEN,
-  // SCRIPT_INTERPOLATION_CLOSE,
+  SCRIPT_OPEN,
+  SCRIPT_CLOSE,
+  SCRIPT_INTERPOLATION_OPEN,
+  SCRIPT_INTERPOLATION_CLOSE,
   DEBUG,
 };
 
 typedef struct {
   bool done;
   Array(uint16_t) indents;
-  // Alternating scripting and scripting interpolation
+  /*
+  Alternating scripting and scripting interpolation where each value is the
+  length of the token.
+  */
   Array(uint16_t) scripting;
 } Scanner;
 
@@ -129,18 +130,20 @@ bool consume_ordered_list_token(Scanner *scanner, TSLexer *lexer) {
 
 void print_symbol(int symbol) {
   switch (symbol) {
-  case LINE_START:               printf("LNS"); break;
-  case LINE_END:                 printf("LNE"); break;
-  case INDENT:                   printf("IND"); break;
-  case DEDENT:                   printf("DED"); break;
-  case END_OF_FILE:              printf("EOF"); break;
-  case FIRST_ORDERED_LIST_TOKEN: printf("FOT"); break;
-  case NEXT_ORDERED_LIST_TOKEN:  printf("NOT"); break;
-  case LIST_ITEM_CONTENT_CONT:   printf("LIC"); break;
-  case LIST_ITEM_CONTENT_END:    printf("LIE"); break;
-  case NON_BLANK_LINE:           printf("NBL"); break;
-  case INLINE_CONTENT_END:       printf("ICE"); break;
-  case DEBUG:                    printf("DBG"); break;
+  case INDENT:                     printf("IND"); break;
+  case DEDENT:                     printf("DED"); break;
+  case END_OF_FILE:                printf("EOF"); break;
+  case FIRST_ORDERED_LIST_TOKEN:   printf("FOT"); break;
+  case NEXT_ORDERED_LIST_TOKEN:    printf("NOT"); break;
+  case LIST_ITEM_CONTENT_CONT:     printf("LIC"); break;
+  case LIST_ITEM_CONTENT_END:      printf("LIE"); break;
+  case NON_BLANK_LINE:             printf("NBL"); break;
+  case INLINE_CONTENT_END:         printf("ICE"); break;
+  case SCRIPT_OPEN:                printf("SCO"); break;
+  case SCRIPT_CLOSE:               printf("SCC"); break;
+  case SCRIPT_INTERPOLATION_OPEN:  printf("SIO"); break;
+  case SCRIPT_INTERPOLATION_CLOSE: printf("SIC"); break;
+  case DEBUG:                      printf("DBG"); break;
   default: break;
   }
 }
@@ -187,12 +190,32 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
       lexer->result_symbol = INLINE_CONTENT_END;
       result(true);
     }
-    result(false);
   }
 
   if (lexer->eof(lexer) && valid_symbols[END_OF_FILE]) {
     lexer->result_symbol = END_OF_FILE;
     scanner->done = true;
+    result(true);
+  }
+
+  if (valid_symbols[SCRIPT_OPEN] && consume_script_open(lexer) == 3) {
+    lexer->mark_end(lexer);
+    lexer->result_symbol = SCRIPT_OPEN;
+    result(true);
+  }
+  if (valid_symbols[SCRIPT_CLOSE] && consume_script_close(lexer) == 3) {
+    lexer->mark_end(lexer);
+    lexer->result_symbol = SCRIPT_CLOSE;
+    result(true);
+  }
+  if (valid_symbols[SCRIPT_INTERPOLATION_OPEN] && consume_script_interpolation_token(lexer) == 2) {
+    lexer->mark_end(lexer);
+    lexer->result_symbol = SCRIPT_INTERPOLATION_OPEN;
+    result(true);
+  }
+  if (valid_symbols[SCRIPT_INTERPOLATION_CLOSE] && consume_script_interpolation_token(lexer) == 2) {
+    lexer->mark_end(lexer);
+    lexer->result_symbol = SCRIPT_INTERPOLATION_CLOSE;
     result(true);
   }
 
@@ -257,6 +280,7 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
     }
     result(false);
   }
+
 
   if (valid_symbols[FIRST_ORDERED_LIST_TOKEN]) {
     int indent_length = consume_inline_whitespace(scanner, lexer);
