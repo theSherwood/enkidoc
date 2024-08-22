@@ -228,7 +228,11 @@ Horizontal Rule 2
 Scripting
 ===============================================================================|
 
-== 1 + 2 = <<<1 + 2>>>
+== <<<ctx.counter("headings")>>> This heading has a leading number built from a counter
 
 -------------------------------------------------------------------------------|
-(source_file)
+(source_file
+  (block_list
+    (block (heading (inline_content
+                      (scripting (script_content))
+                      (inline_text))))))

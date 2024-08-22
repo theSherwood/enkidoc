@@ -26,10 +26,12 @@ module.exports = grammar({
     $._list_item_content_cont,
     $._list_item_content_end,
     $._non_blank_line,
+    $._inline_content_end,
     $._DEBUG,
   ],
 
   conflicts: $ => [
+    [$.inline_text]
   ],
 
   extras: $ => [],
@@ -50,15 +52,15 @@ module.exports = grammar({
         $.heading,
         $.horizontal_rule,
         $.ordered_list,
-        seq($.scripting, optional($._newline_token)),
+        $.script_block,
       ),
       $._block_separator,
     ),
     block_list: $ => repeat1(
       $.block,
     ),
-    inline_text: $ => /[^\n]*[^\s]+[^\n]*/,
-    // inline_text: $ => prec(10, seq($._text_base)),
+    // inline_text: $ => /[^\n]*[^\s]+[^\n]*/,
+    inline_text: $ => prec(10, repeat1(prec(10, $._text_base))),
     _inline_whitespace: $ => /[ \t]+/,
 
     _newline_token: $ => /\n|\r\n?/,
@@ -76,6 +78,8 @@ module.exports = grammar({
 
     _text_base: $ => choice(
       // /[^\n]*[^\s]+[^\n]*/,
+      /[A-Za-z \t=.,:;'"+\-]+/,
+      // /[=.+\-]/,
       $._word,
       $._whitespace,
       /\\<{3,}/,     // escaped scripting
@@ -91,7 +95,7 @@ module.exports = grammar({
       // '<![CDATA[',
     ),
 
-    _scripting_text: $ => choice(
+    _script_text: $ => choice(
       prec(-1, $._word),
       prec(-1, $._whitespace),
       prec(-1, $._newline_token),
@@ -110,29 +114,33 @@ module.exports = grammar({
       '##', field('content', $.block_list), '##',
     ),
 
-    script_text: $ => /[^#]/,
-
     script_content: $ => repeat1(choice(
-      $._raw,
+      $._script_text,
       $.script_interpolation,
     )),
 
     scripting: $ => seq(
-      token(prec(10, '<<<')),
-      field('content', $.script_content),
-      '>>>'
+      '<<<', $.script_content, '>>>'
     ),
 
     // // TODO - _line_break
-    inline_content: $ => repeat1(choice(
-      prec.left(-1, $.inline_text),
-      prec.left(10, $.email_autolink),
-      prec.left(10, $.uri_autolink),
-      prec.left(10, $.scripting),
-    )),
+    inline_content: $ => seq(
+      repeat1(choice(
+        prec.left(10, $.inline_text),
+        prec.left(10, $.email_autolink),
+        prec.left(10, $.uri_autolink),
+        prec.left(10, $.scripting),
+      )),
+      $._inline_content_end,
+    ),
 
     /* BLOCKS
     ==========================================================================*/
+
+    script_block: $ => seq(
+      $.scripting,
+      optional($._newline_token),
+    ),
 
     paragraph: $ => seq(
       field('content', seq(
