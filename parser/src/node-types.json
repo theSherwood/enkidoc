@@ -248,7 +248,11 @@
     }
   },
   {
-    "type": "#",
+    "type": "!",
+    "named": false
+  },
+  {
+    "type": "\"",
     "named": false
   },
   {
@@ -256,23 +260,59 @@
     "named": false
   },
   {
-    "type": "###",
+    "type": "$",
     "named": false
   },
   {
-    "type": "####",
+    "type": "%",
     "named": false
   },
   {
-    "type": "#####",
+    "type": "&",
     "named": false
   },
   {
-    "type": "######",
+    "type": "'",
     "named": false
   },
   {
-    "type": "#######",
+    "type": "(",
+    "named": false
+  },
+  {
+    "type": ")",
+    "named": false
+  },
+  {
+    "type": "*",
+    "named": false
+  },
+  {
+    "type": "+",
+    "named": false
+  },
+  {
+    "type": ",",
+    "named": false
+  },
+  {
+    "type": "-",
+    "named": false
+  },
+  {
+    "type": ".",
+    "named": false
+  },
+  {
+    "type": "/",
+    "named": false
+  },
+  {
+    "type": ":",
+    "named": false
+  },
+  {
+    "type": ";",
     "named": false
   },
   {
@@ -280,35 +320,11 @@
     "named": false
   },
   {
-    "type": "<<",
-    "named": false
-  },
-  {
     "type": "<<<",
     "named": false
   },
   {
-    "type": "<<<<",
-    "named": false
-  },
-  {
-    "type": "<<<<<",
-    "named": false
-  },
-  {
-    "type": "<<<<<<",
-    "named": false
-  },
-  {
-    "type": "<<<<<<<",
-    "named": false
-  },
-  {
-    "type": ">",
-    "named": false
-  },
-  {
-    "type": ">>",
+    "type": "=",
     "named": false
   },
   {
@@ -316,19 +332,15 @@
     "named": false
   },
   {
-    "type": ">>>>",
+    "type": "?",
     "named": false
   },
   {
-    "type": ">>>>>",
+    "type": "@",
     "named": false
   },
   {
-    "type": ">>>>>>",
-    "named": false
-  },
-  {
-    "type": ">>>>>>>",
+    "type": "[",
     "named": false
   },
   {
@@ -337,6 +349,26 @@
   },
   {
     "type": "[x]",
+    "named": false
+  },
+  {
+    "type": "\\",
+    "named": false
+  },
+  {
+    "type": "]",
+    "named": false
+  },
+  {
+    "type": "^",
+    "named": false
+  },
+  {
+    "type": "_",
+    "named": false
+  },
+  {
+    "type": "`",
     "named": false
   },
   {
@@ -354,5 +386,21 @@
   {
     "type": "uri_autolink",
     "named": true
+  },
+  {
+    "type": "{",
+    "named": false
+  },
+  {
+    "type": "|",
+    "named": false
+  },
+  {
+    "type": "}",
+    "named": false
+  },
+  {
+    "type": "~",
+    "named": false
   }
 ]

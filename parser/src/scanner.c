@@ -6,6 +6,19 @@
 #include <stdio.h>
 #include <string.h>
 
+#define VERBOSE 1
+
+// Print the result symbol and return the bool
+#define result(x) {                              \
+  if (VERBOSE) {                                 \
+    printf("RESULT:   ");                        \
+    if ((x)) print_symbol(lexer->result_symbol); \
+    else printf("FALSE");                        \
+    printf("\n");                                \
+  }                                              \
+  return (x);                                    \
+}
+
 // https://github.com/tree-sitter/tree-sitter-python/blob/master/src/scanner.c
 
 enum TokenType {
@@ -18,6 +31,7 @@ enum TokenType {
   NEXT_ORDERED_LIST_TOKEN,
   LIST_ITEM_CONTENT_CONT,
   LIST_ITEM_CONTENT_END,
+  NON_BLANK_LINE,
   DEBUG,
 };
 
@@ -74,20 +88,35 @@ bool consume_ordered_list_token(Scanner *scanner, TSLexer *lexer) {
   return false;
 }
 
-void print_valid(const bool *valid_symbols) {
+void print_symbol(int symbol) {
+  switch (symbol) {
+  case LINE_START:               printf("LNS"); break;
+  case LINE_END:                 printf("LNE"); break;
+  case INDENT:                   printf("IND"); break;
+  case DEDENT:                   printf("DED"); break;
+  case END_OF_FILE:              printf("EOF"); break;
+  case FIRST_ORDERED_LIST_TOKEN: printf("FOT"); break;
+  case NEXT_ORDERED_LIST_TOKEN:  printf("NOT"); break;
+  case LIST_ITEM_CONTENT_CONT:   printf("LIC"); break;
+  case LIST_ITEM_CONTENT_END:    printf("LIE"); break;
+  case NON_BLANK_LINE:           printf("NBL"); break;
+  case DEBUG:                    printf("DBG"); break;
+  default: break;
+  }
+}
+
+void print_scan(TSLexer *lexer, const bool *valid_symbols) {
   int i = 0;
-  printf("valid: ");
+  char c = lexer->lookahead;
+  if (lexer->eof(lexer))    printf("SCAN     <eof>:" );
+  else if (c == '\n')       printf("SCAN <newline>:");
+  else if (c == ' ')        printf("SCAN   <space>:");
+  else if (c == '\t')       printf("SCAN     <tab>:");
+  else                      printf("SCAN         %c:", lexer->lookahead);
   for (; i <= DEBUG; i++) {
-    if (i == LINE_START)                     printf(" LNS ");
-    else if (i == LINE_END)                  printf(" LNE ");
-    else if (i == INDENT)                    printf(" IND ");
-    else if (i == DEDENT)                    printf(" DED ");
-    else if (i == END_OF_FILE)               printf(" EOF ");
-    else if (i == FIRST_ORDERED_LIST_TOKEN)  printf(" FOT ");
-    else if (i == NEXT_ORDERED_LIST_TOKEN)   printf(" NOT ");
-    else if (i == LIST_ITEM_CONTENT_CONT)    printf(" LIC ");
-    else if (i == LIST_ITEM_CONTENT_END)     printf(" LIE ");
-    else if (i == DEBUG)                     printf(" DBG ");
+    printf(" ");
+    print_symbol(i);
+    printf(" ");
     printf("%d ", valid_symbols[i]);
   }
   printf("\n");
@@ -98,62 +127,26 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
 
   char c = lexer->lookahead;
 
-  // print_valid(valid_symbols);
-  // if (lexer->eof(lexer))    printf("scan <eof>\n" );
-  // else if (c == '\n')       printf("scan <newline>\n");
-  // else if (c == ' ')        printf("scan <space>\n");
-  // else if (c == '\t')       printf("scan <tab>\n");
-  // else                      printf("scan %c\n", lexer->lookahead);
+  if (VERBOSE) print_scan(lexer, valid_symbols);
 
   if (scanner->done) {
     // printf("DONE\n");
-    return false;
+    result(false);
   }
-
-  // if (valid_symbols[LIST_ITEM_CONTENT_END]) {
-  //   // printf("LIST_ITEM_CONTENT_END?\n");
-  //   lexer->mark_end(lexer);
-  //   if (consume_blank_line(scanner, lexer)) {
-  //     lexer->result_symbol = LIST_ITEM_CONTENT_END;
-  //     // printf("LIST_ITEM_CONTENT_END TRUE\n");
-  //     return true;
-  //   }
-  //   if (consume_newline(scanner, lexer)) {
-  //     int whitespace = consume_inline_whitespace(scanner, lexer);
-  //     // printf("whitespace %d\n", whitespace);
-  //     if (consume_ordered_list_token(scanner, lexer)) {
-  //       lexer->result_symbol = LIST_ITEM_CONTENT_END;
-  //       // printf("LIST_ITEM_CONTENT_END TRUE\n");
-  //       return true;
-  //     }
-  //     if (lexer->eof(lexer)) {
-  //       lexer->result_symbol = LIST_ITEM_CONTENT_END;
-  //       // printf("LIST_ITEM_CONTENT_END TRUE\n");
-  //       return true;
-  //     }
-  //   }
-  //   if (lexer->eof(lexer)) {
-  //     lexer->result_symbol = LIST_ITEM_CONTENT_END;
-  //     // printf("LIST_ITEM_CONTENT_END TRUE\n");
-  //     return true;
-  //   }
-  //   // printf("LIST_ITEM_CONTENT_END FALSE\n");
-  //   return false;
-  // }
 
   lexer->mark_end(lexer);
 
   if (valid_symbols[DEBUG]) {
     // printf("DEBUG!!! %d\n", DEBUG);
     lexer->result_symbol = DEBUG;
-    return true;
+    result(true);
   }
 
   if (lexer->eof(lexer) && valid_symbols[END_OF_FILE]) {
     lexer->result_symbol = END_OF_FILE;
     scanner->done = true;
     // printf("eof\n");
-    return true;
+    result(true);
   }
 
   uint16_t current_indent_length = 0;
@@ -173,9 +166,9 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
         array_pop(&scanner->indents);
         lexer->result_symbol = DEDENT;
         // printf("DEDENT A TRUE %d\n", current_indent_length - 2);
-        return true;
+        result(true);
       }
-      return false;
+      result(false);
     }
     if (consume_newline(scanner, lexer)) {
       // printf("//////////////////////\n");
@@ -187,7 +180,7 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
         lexer->mark_end(lexer);
     // printf("MARK_END------------------------------\n");
         lexer->result_symbol = NEXT_ORDERED_LIST_TOKEN;
-        return true;
+        result(true);
       }
       // printf("whitespace %d\n", indent_length);
       if (lexer->eof(lexer) || consume_newline(scanner, lexer)) {
@@ -195,9 +188,9 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
           array_pop(&scanner->indents);
           lexer->result_symbol = DEDENT;
           // printf("DEDENT B TRUE %d\n", current_indent_length - 2);
-          return true;
+          result(true);
         }
-        return false;
+        result(false);
       }
       if (scanner->indents.size > 0) {
         if (indent_diff == 2) {
@@ -206,7 +199,7 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
             array_push(&scanner->indents, indent_length);
             lexer->result_symbol = INDENT;
             // printf("INDENT TRUE %d\n", indent_length);
-            return true;
+            result(true);
           }
         } else if (current_indent_length > 0 && 
                    (consume_newline(scanner, lexer) ||
@@ -214,24 +207,24 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
           array_pop(&scanner->indents);
           lexer->result_symbol = DEDENT;
           // printf("DEDENT C TRUE %d\n", current_indent_length - 2);
-          return true;
+          result(true);
         } else if (valid_symbols[DEDENT] && indent_diff < 0 && indent_diff % 2 == 0) {
           if (consume_ordered_list_token(scanner, lexer)) {
             // array_push(&scanner->indents, current_indent_length - 2);
             array_pop(&scanner->indents);
             lexer->result_symbol = DEDENT;
             // printf("DEDENT D TRUE %d\n", current_indent_length - 2);
-            return true;
+            result(true);
           }
         }
       }
       {
         // printf("LIST_ITEM_CONTENT TRUE\n");
         lexer->result_symbol = LIST_ITEM_CONTENT_CONT;
-        return true;
+        result(true);
       }
     }
-    return false;
+    result(false);
   }
 
   // if (valid_symbols[DEDENT]) {
@@ -256,9 +249,9 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
       lexer->mark_end(lexer);
       lexer->result_symbol = FIRST_ORDERED_LIST_TOKEN;
       // printf("FIRST_ORDERED_LIST_TOKEN TRUE\n");
-      return true;
+      result(true);
     }
-    return false;
+    result(false);
   }
 
   if (valid_symbols[NEXT_ORDERED_LIST_TOKEN] && valid_symbols[DEDENT]) {
@@ -269,25 +262,25 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
         // printf("NEXT_ORDERED_LIST_TOKEN TRUE\n");
         lexer->mark_end(lexer);
         lexer->result_symbol = NEXT_ORDERED_LIST_TOKEN;
-        return true;
+        result(true);
       } else if (current_indent_length > 0 && 
                  (consume_newline(scanner, lexer) ||
                   lexer->eof(lexer))) {
         array_pop(&scanner->indents);
         lexer->result_symbol = DEDENT;
         // printf("DEDENT E TRUE %d\n", current_indent_length - 2);
-        return true;
+        result(true);
       } else if (indent_diff < 0 && indent_diff % 2 == 0) {
         if (consume_ordered_list_token(scanner, lexer)) {
           // array_push(&scanner->indents, current_indent_length - 2);
           array_pop(&scanner->indents);
           lexer->result_symbol = DEDENT;
           // printf("DEDENT F TRUE %d\n", current_indent_length - 2);
-          return true;
+          result(true);
         }
       }
     }
-    return false;
+    result(false);
   }
 
   if (valid_symbols[NEXT_ORDERED_LIST_TOKEN]) {
@@ -300,13 +293,13 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
         lexer->mark_end(lexer);
     // printf("MARK_END------------------------------\n");
         lexer->result_symbol = NEXT_ORDERED_LIST_TOKEN;
-        return true;
+        result(true);
       }
     }
-    return false;
+    result(false);
   }
 
-  return false;
+  result(false);
 }
 
 unsigned tree_sitter_enkidoc_external_scanner_serialize(void *payload, char *buffer) {
@@ -351,187 +344,3 @@ void tree_sitter_enkidoc_external_scanner_destroy(void *payload) {
     array_delete(&scanner->indents);
     free(scanner);
 }
-
-/*
-
-
-===============================================================================|
-Ordered List 2
-===============================================================================|
-
-+ item a
-+ item b
-+ item c
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item)
-        items: (ordered_list_item)
-        items: (ordered_list_item)))))
-
-===============================================================================|
-Ordered List 3
-===============================================================================|
-
-+ item a
-this line is part of the list item above
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item)))))
-
-===============================================================================|
-Ordered List 4
-===============================================================================|
-
-+ item a
-this line is part of the list item above
-as is this line
-+ item b
-  same sort of thing
-  but with an
-  indented hard wrap
-+ item c
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item)
-        items: (ordered_list_item)
-        items: (ordered_list_item)))))
-
-===============================================================================|
-Ordered List 5
-===============================================================================|
-
-+ item a
-this line is part of the list item above
-as is this line
-+ item b
-  same sort of thing
-  but with an
-  indented hard wrap
-
-+ item c
-+ item d
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item)
-        items: (ordered_list_item)))
-    (block
-      (ordered_list
-        items: (ordered_list_item)
-        items: (ordered_list_item)))))
-
-===============================================================================|
-Ordered List with depth 1
-===============================================================================|
-+ a
-  + aa
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item
-                 children: (ordered_list
-                             items: (ordered_list_item)))))))
-
-===============================================================================|
-Ordered List with depth 2
-===============================================================================|
-+ a
-this is part of the item above
-  + aa
-this is part of the item above
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item
-                 children: (ordered_list
-                             items: (ordered_list_item)))))))
-
-===============================================================================|
-Ordered List with depth 3
-===============================================================================|
-+ a
-this is part of the item above
-  + aa
-this is part of the item above
-  + ab
-    + aba
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item
-                 children: (ordered_list
-                             items: (ordered_list_item)
-                             items: (ordered_list_item
-                                      children: (ordered_list
-                                                  items: (ordered_list_item)))))))))
-
-===============================================================================|
-Ordered List with depth 4
-===============================================================================|
-
-+ a
-  + aa
-this is part of the item above
-+ b
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item
-                 children: (ordered_list
-                             items: (ordered_list_item)))
-        items: (ordered_list_item)))))
-
-===============================================================================|
-Ordered List with depth 5
-===============================================================================|
-
-+ a
-  + aa
-    + aaa
-      + aaaa
-        + aaaaa 
-    + ab
-
--------------------------------------------------------------------------------|
-(source_file
-  (block_list
-    (block
-      (ordered_list
-        items: (ordered_list_item
-                 children: (ordered_list
-                             items: (ordered_list_item
-                                      children: (ordered_list
-                                                  items: (ordered_list_item
-                                                           children: (ordered_list
-                                                                       items: (ordered_list_item
-                                                                                children: (ordered_list
-                                                                                            items: (ordered_list_item)))))))
-                             items: (ordered_list_item)))))))
-
-*/
