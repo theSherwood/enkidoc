@@ -225,7 +225,7 @@ Horizontal Rule 2
     (block (horizontal_rule))))
 
 ===============================================================================|
-Scripting
+Scripting 1
 ===============================================================================|
 
 == <<<ctx.counter("headings")>>> This heading has a leading number built from a counter
@@ -236,3 +236,41 @@ Scripting
     (block (heading (inline_content
                       (scripting (script_content))
                       (inline_text))))))
+
+===============================================================================|
+Scripting with interpolation 1
+===============================================================================|
+
+something <<< do(() => {
+  console.log(##
+== This is a heading
+  ##);
+  console.log(## == This is another heading ##);
+  console.log(##== This is yet another heading##);
+}) >>> or other
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (paragraph
+        (inline_content
+          (inline_text)
+          (scripting
+            (script_content
+              (script_interpolation
+                (block
+                  (heading
+                    (inline_content
+                      (inline_text)))))
+              (script_interpolation
+                (block
+                  (paragraph
+                    (inline_content
+                      (inline_text)))))
+              (script_interpolation
+                (block
+                  (heading
+                    (inline_content
+                      (inline_text)))))))
+          (inline_text))))))

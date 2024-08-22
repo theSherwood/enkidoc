@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define VERBOSE 0
+#define VERBOSE 1
 
 // Print the result symbol and return the bool
 #define result(x) {                              \
@@ -33,12 +33,18 @@ enum TokenType {
   LIST_ITEM_CONTENT_END,
   NON_BLANK_LINE,
   INLINE_CONTENT_END,
+  // SCRIPT_OPEN,
+  // SCRIPT_CLOSE,
+  // SCRIPT_INTERPOLATION_OPEN,
+  // SCRIPT_INTERPOLATION_CLOSE,
   DEBUG,
 };
 
 typedef struct {
   bool done;
   Array(uint16_t) indents;
+  // Alternating scripting and scripting interpolation
+  Array(uint16_t) scripting;
 } Scanner;
 
 static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
@@ -66,6 +72,38 @@ int consume_inline_whitespace(Scanner *scanner, TSLexer *lexer) {
     } else {
       break;
     }
+  }
+  return count;
+}
+
+int consume_script_open(TSLexer *lexer) {
+  int count = 0;
+  while (true) {
+    if (lexer->lookahead == '<') {
+      advance(lexer);
+      count++;
+    } else break;
+  }
+  return count;
+}
+int consume_script_close(TSLexer *lexer) {
+  int count = 0;
+  while (true) {
+    if (lexer->lookahead == '>') {
+      advance(lexer);
+      count++;
+    } else break;
+  }
+  return count;
+}
+
+int consume_script_interpolation_token(TSLexer *lexer) {
+  int count = 0;
+  while (true) {
+    if (lexer->lookahead == '#') {
+      advance(lexer);
+      count++;
+    } else break;
   }
   return count;
 }
@@ -143,7 +181,9 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
   }
 
   if (valid_symbols[INLINE_CONTENT_END]) {
-    if (lexer->eof(lexer) || consume_newline(scanner, lexer)) {
+    if (lexer->eof(lexer) ||
+        consume_newline(scanner, lexer) ||
+        consume_script_interpolation_token(lexer) > 1) {
       lexer->result_symbol = INLINE_CONTENT_END;
       result(true);
     }

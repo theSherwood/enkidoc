@@ -77,44 +77,44 @@
       ]
     },
     "block": {
-      "type": "SEQ",
+      "type": "CHOICE",
       "members": [
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "paragraph"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "heading"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "horizontal_rule"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "ordered_list"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "script_block"
-            }
-          ]
+          "type": "SYMBOL",
+          "name": "paragraph"
         },
         {
           "type": "SYMBOL",
-          "name": "_block_separator"
+          "name": "heading"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "horizontal_rule"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "ordered_list"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "script_block"
         }
       ]
     },
     "block_list": {
       "type": "REPEAT1",
       "content": {
-        "type": "SYMBOL",
-        "name": "block"
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "block"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_block_separator"
+          }
+        ]
       }
     },
     "inline_text": {
@@ -139,6 +139,63 @@
     "_newline_token": {
       "type": "PATTERN",
       "value": "\\n|\\r\\n?"
+    },
+    "_interpolated_block_list": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "[ \\t\\n]+"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "block"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "REPEAT1",
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "_block_separator"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "block"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "[ \\t\\n]+"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
     },
     "_single_whitespace": {
       "type": "PATTERN",
@@ -217,6 +274,10 @@
     "_script_text": {
       "type": "CHOICE",
       "members": [
+        {
+          "type": "PATTERN",
+          "value": "[A-Za-z0-9 \\t\\n\\r=.,:;'\"+\\-\\(\\)\\[\\]\\{\\}]+"
+        },
         {
           "type": "PREC",
           "value": -1,
@@ -380,7 +441,7 @@
           "value": 10,
           "content": {
             "type": "PATTERN",
-            "value": "[^#]#[^#]"
+            "value": "#[^#]"
           }
         },
         {
@@ -388,14 +449,10 @@
           "value": 11,
           "content": {
             "type": "PATTERN",
-            "value": "[^>]>>[^>]"
+            "value": ">{1,2}[^>]"
           }
         }
       ]
-    },
-    "_raw": {
-      "type": "PATTERN",
-      "value": "(.|\\n)+"
     },
     "uri_autolink": {
       "type": "PATTERN",
@@ -417,7 +474,7 @@
           "name": "content",
           "content": {
             "type": "SYMBOL",
-            "name": "block_list"
+            "name": "_interpolated_block_list"
           }
         },
         {
@@ -880,7 +937,8 @@
   "extras": [],
   "conflicts": [
     [
-      "inline_text"
+      "script_interpolation",
+      "paragraph"
     ]
   ],
   "precedences": [],

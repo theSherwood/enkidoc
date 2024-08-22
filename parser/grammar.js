@@ -31,7 +31,7 @@ module.exports = grammar({
   ],
 
   conflicts: $ => [
-    [$.inline_text]
+    [$.script_interpolation, $.paragraph]
   ],
 
   extras: $ => [],
@@ -47,23 +47,32 @@ module.exports = grammar({
       seq(repeat1($._blank_line), optional($._eof)),
       $._eof,
     ),
-    block: $ => seq(choice(
-        $.paragraph,
-        $.heading,
-        $.horizontal_rule,
-        $.ordered_list,
-        $.script_block,
-      ),
-      $._block_separator,
+    block: $ => choice(
+      $.paragraph,
+      $.heading,
+      $.horizontal_rule,
+      $.ordered_list,
+      $.script_block,
     ),
-    block_list: $ => repeat1(
+    block_list: $ => repeat1(seq(
       $.block,
-    ),
+      $._block_separator,
+    )),
     // inline_text: $ => /[^\n]*[^\s]+[^\n]*/,
     inline_text: $ => prec(10, repeat1(prec(10, $._text_base))),
     _inline_whitespace: $ => /[ \t]+/,
 
     _newline_token: $ => /\n|\r\n?/,
+
+    _interpolated_block_list: $ => seq(
+      optional(/[ \t\n]+/),
+      $.block,
+      optional(repeat1(seq(
+        $._block_separator,
+        $.block,
+      ))),
+      optional(/[ \t\n]+/),
+    ),
 
     /* INLINE
     ==========================================================================*/
@@ -96,22 +105,23 @@ module.exports = grammar({
     ),
 
     _script_text: $ => choice(
+      /[A-Za-z0-9 \t\n\r=.,:;'"+\-\(\)\[\]\{\}]+/,
       prec(-1, $._word),
       prec(-1, $._whitespace),
       prec(-1, $._newline_token),
       prec(-1, punctuation_without($, ['#', '>'])),
-      prec(10, /[^#]#[^#]/),  // match up to 1 consecutive #
-      prec(11, /[^>]>>[^>]/), // match up to 2 consecutive >>
+      prec(10, /#[^#]/),      // match up to 1 consecutive #
+      prec(11, />{1,2}[^>]/), // match up to 2 consecutive >>
     ),
-
-    _raw: $ => /(.|\n)+/,
 
     // https://github.github.com/gfm/#autolinks
     uri_autolink: $ => /<[a-zA-Z][a-zA-Z0-9+\.\-][a-zA-Z0-9+\.\-]*:[^ \t\r\n<>]*>/,
     email_autolink: $ => /<[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*>/,
 
     script_interpolation: $ => seq(
-      '##', field('content', $.block_list), '##',
+      '##', field('content', $._interpolated_block_list), '##',
+      // '##', field('content', repeat1(choice($.block))), '##',
+      // '##', field('content', $.block_list), $._DEBUG, '##',
     ),
 
     script_content: $ => repeat1(choice(

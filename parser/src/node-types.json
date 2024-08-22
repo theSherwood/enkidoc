@@ -225,11 +225,11 @@
     "named": true,
     "fields": {
       "content": {
-        "multiple": false,
+        "multiple": true,
         "required": true,
         "types": [
           {
-            "type": "block_list",
+            "type": "block",
             "named": true
           }
         ]
