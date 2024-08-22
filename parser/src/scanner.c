@@ -35,6 +35,7 @@ enum TokenType {
   SCRIPT_CLOSE,
   SCRIPT_INTERPOLATION_OPEN,
   SCRIPT_INTERPOLATION_CLOSE,
+  BLOCK_SEPARATOR,
   DEBUG,
 };
 
@@ -128,6 +129,27 @@ bool consume_ordered_list_token(Scanner *scanner, TSLexer *lexer) {
   return false;
 }
 
+bool consume_block_separator(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols, bool skip_newline) {
+  if (valid_symbols[BLOCK_SEPARATOR]) {
+    consume_inline_whitespace(scanner, lexer);
+    if (skip_newline || consume_newline(scanner, lexer)) {
+      consume_inline_whitespace(scanner, lexer);
+      if (lexer->eof(lexer) || consume_newline(scanner, lexer)) {
+        lexer->result_symbol = BLOCK_SEPARATOR;
+        return true;
+      }
+    } else if (lexer->eof(lexer)) {
+      lexer->result_symbol = BLOCK_SEPARATOR;
+      return true;
+    }
+    int size = scanner->scripting.size;
+    if (size % 2 == 0 && consume_script_interpolation_token(lexer)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void print_symbol(int symbol) {
   switch (symbol) {
   case INDENT:                     printf("IND"); break;
@@ -143,6 +165,7 @@ void print_symbol(int symbol) {
   case SCRIPT_CLOSE:               printf("SCC"); break;
   case SCRIPT_INTERPOLATION_OPEN:  printf("SIO"); break;
   case SCRIPT_INTERPOLATION_CLOSE: printf("SIC"); break;
+  case BLOCK_SEPARATOR:            printf("BSP"); break;
   case DEBUG:                      printf("DBG"); break;
   default: break;
   }
@@ -192,30 +215,44 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
     }
   }
 
-  if (lexer->eof(lexer) && valid_symbols[END_OF_FILE]) {
-    lexer->result_symbol = END_OF_FILE;
-    scanner->done = true;
-    result(true);
-  }
-
-  if (valid_symbols[SCRIPT_OPEN] && consume_script_open(lexer) == 3) {
-    lexer->mark_end(lexer);
-    lexer->result_symbol = SCRIPT_OPEN;
-    result(true);
-  }
-  if (valid_symbols[SCRIPT_CLOSE] && consume_script_close(lexer) == 3) {
-    lexer->mark_end(lexer);
-    lexer->result_symbol = SCRIPT_CLOSE;
-    result(true);
-  }
   if (valid_symbols[SCRIPT_INTERPOLATION_OPEN] && consume_script_interpolation_token(lexer) == 2) {
+    array_push(&scanner->scripting, 2);
     lexer->mark_end(lexer);
     lexer->result_symbol = SCRIPT_INTERPOLATION_OPEN;
     result(true);
   }
-  if (valid_symbols[SCRIPT_INTERPOLATION_CLOSE] && consume_script_interpolation_token(lexer) == 2) {
+  if (valid_symbols[SCRIPT_INTERPOLATION_CLOSE]) {
+    consume_inline_whitespace(scanner, lexer);
+    if (lexer->eof(lexer) || consume_script_interpolation_token(lexer) == 2) {
+      array_pop(&scanner->scripting);
+      lexer->mark_end(lexer);
+      lexer->result_symbol = SCRIPT_INTERPOLATION_CLOSE;
+      result(true);
+    }
+  }
+  if (valid_symbols[SCRIPT_OPEN] && consume_script_open(lexer) == 3) {
+    array_push(&scanner->scripting, 3);
     lexer->mark_end(lexer);
-    lexer->result_symbol = SCRIPT_INTERPOLATION_CLOSE;
+    lexer->result_symbol = SCRIPT_OPEN;
+    result(true);
+  }
+  if (valid_symbols[SCRIPT_CLOSE]) {
+    consume_inline_whitespace(scanner, lexer);
+    if (lexer->eof(lexer) || consume_script_close(lexer) == 3) {
+      array_pop(&scanner->scripting);
+      lexer->mark_end(lexer);
+      lexer->result_symbol = SCRIPT_CLOSE;
+      result(true);
+    }
+  }
+
+  if (lexer->eof(lexer) && valid_symbols[END_OF_FILE]) {
+    if (valid_symbols[BLOCK_SEPARATOR]) {
+      lexer->result_symbol = BLOCK_SEPARATOR;
+      result(true);
+    }
+    lexer->result_symbol = END_OF_FILE;
+    scanner->done = true;
     result(true);
   }
 
@@ -234,6 +271,10 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
         lexer->result_symbol = DEDENT;
         result(true);
       }
+      if (valid_symbols[BLOCK_SEPARATOR]) {
+        lexer->result_symbol = BLOCK_SEPARATOR;
+        result(true);
+      }
       result(false);
     }
     if (consume_newline(scanner, lexer)) {
@@ -248,6 +289,10 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
         if (current_indent_length > 0 && valid_symbols[DEDENT]) {
           array_pop(&scanner->indents);
           lexer->result_symbol = DEDENT;
+          result(true);
+        }
+        if (valid_symbols[BLOCK_SEPARATOR]) {
+          lexer->result_symbol = BLOCK_SEPARATOR;
           result(true);
         }
         result(false);
@@ -281,7 +326,6 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
     result(false);
   }
 
-
   if (valid_symbols[FIRST_ORDERED_LIST_TOKEN]) {
     int indent_length = consume_inline_whitespace(scanner, lexer);
     int indent_diff = indent_length - current_indent_length;
@@ -313,7 +357,13 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
           lexer->result_symbol = DEDENT;
           result(true);
         }
+      } else if (consume_block_separator(scanner, lexer, valid_symbols, 1)) {
+        lexer->result_symbol = BLOCK_SEPARATOR;
+        result(true);
       }
+    } else if (consume_block_separator(scanner, lexer, valid_symbols, 1)) {
+      lexer->result_symbol = BLOCK_SEPARATOR;
+      result(true);
     }
     result(false);
   }
@@ -326,9 +376,20 @@ bool tree_sitter_enkidoc_external_scanner_scan(void *payload, TSLexer *lexer, co
         lexer->mark_end(lexer);
         lexer->result_symbol = NEXT_ORDERED_LIST_TOKEN;
         result(true);
+      } else if (consume_block_separator(scanner, lexer, valid_symbols, 1)) {
+        lexer->result_symbol = BLOCK_SEPARATOR;
+        result(true);
       }
+    } else if (consume_block_separator(scanner, lexer, valid_symbols, 1)) {
+      lexer->result_symbol = BLOCK_SEPARATOR;
+      result(true);
     }
     result(false);
+  }
+
+  if (consume_block_separator(scanner, lexer, valid_symbols, 0)) {
+    lexer->result_symbol = BLOCK_SEPARATOR;
+    result(true);
   }
 
   result(false);
@@ -342,6 +403,10 @@ unsigned tree_sitter_enkidoc_external_scanner_serialize(void *payload, char *buf
   for (; iter < scanner->indents.size && size < TREE_SITTER_SERIALIZATION_BUFFER_SIZE; ++iter) {
     buffer[size++] = (char)*array_get(&scanner->indents, iter);
   }
+  iter = 1;
+  for (; iter < scanner->scripting.size && size < TREE_SITTER_SERIALIZATION_BUFFER_SIZE; ++iter) {
+    buffer[size++] = (char)*array_get(&scanner->scripting, iter);
+  }
   return size;
 }
 
@@ -350,11 +415,16 @@ void tree_sitter_enkidoc_external_scanner_deserialize(void *payload, const char 
   scanner->done = false;
   array_delete(&scanner->indents);
   array_push(&scanner->indents, 0);
+  array_delete(&scanner->scripting);
+  array_push(&scanner->scripting, 0);
   if (length > 0) {
     size_t size = 0;
     scanner->done = buffer[size++];
     for (; size < length; size++) {
       array_push(&scanner->indents, (unsigned char)buffer[size]);
+    }
+    for (; size < length; size++) {
+      array_push(&scanner->scripting, (unsigned char)buffer[size]);
     }
   }
 }
@@ -363,6 +433,7 @@ void *tree_sitter_enkidoc_external_scanner_create() {
     Scanner *scanner = calloc(1, sizeof(Scanner));
     scanner->done = false;
     array_init(&scanner->indents);
+    array_init(&scanner->scripting);
     tree_sitter_enkidoc_external_scanner_deserialize(scanner, NULL, 0);
     return scanner;
 }
@@ -370,5 +441,6 @@ void *tree_sitter_enkidoc_external_scanner_create() {
 void tree_sitter_enkidoc_external_scanner_destroy(void *payload) {
     Scanner *scanner = (Scanner *)payload;
     array_delete(&scanner->indents);
+    array_delete(&scanner->scripting);
     free(scanner);
 }

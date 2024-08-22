@@ -285,3 +285,92 @@ something <<< do(() => {
                     (inline_content
                       (inline_text)))))))
           (inline_text))))))
+
+===============================================================================|
+Scripting with interpolation 2
+===============================================================================|
+
+something <<< do(() => {
+  console.log(##
+== This is a heading <<< "with nested ## content ##" >>>
+  ##);
+})
+>>>
+with some more text
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (paragraph
+        (inline_content
+          (inline_text)
+          (scripting
+            (script_content
+              (script_interpolation
+                (block
+                  (heading
+                    (inline_content
+                      (inline_text)
+                      (scripting
+                        (script_content
+                          (script_interpolation
+                            (block
+                              (paragraph
+                                (inline_content
+                                  (inline_text))))))))))))))
+        (inline_content (inline_text))))))
+
+===============================================================================|
+Scripting with interpolation 3
+===============================================================================|
+
+something <<< do(() => {
+  console.log(##
+
+= We can put
+
+an entire page in this
+
+== thing
+
+which
+is
+pretty cool
+
+  ##);
+})
+>>>
+with some more text
+
+-------------------------------------------------------------------------------|
+(source_file
+  (block_list
+    (block
+      (paragraph
+        (inline_content
+          (inline_text)
+          (scripting
+            (script_content
+              (script_interpolation
+                (block
+                  (heading
+                    (inline_content
+                      (inline_text))))
+                (block
+                  (paragraph
+                    (inline_content
+                      (inline_text))))
+                (block
+                  (heading
+                    (inline_content
+                      (inline_text))))
+                (block
+                  (paragraph
+                    (inline_content
+                      (inline_text))
+                    (inline_content
+                      (inline_text))
+                    (inline_content
+                      (inline_text))))))))
+        (inline_content (inline_text))))))

@@ -29,10 +29,19 @@ module.exports = grammar({
     $._script_close,
     $._script_interpolation_open,
     $._script_interpolation_close,
+    $._post_block_separator,
     $._DEBUG,
   ],
 
   conflicts: $ => [
+    // [$.horizontal_rule],
+    // [$.script_block],
+    [$.paragraph],
+    [$.heading],
+    // [$.ordered_list],
+    [$._interpolated_block_list],
+    // [$.source_file, $._block_separator],
+    // [$._block_separator],
   ],
 
   extras: $ => [],
@@ -57,22 +66,32 @@ module.exports = grammar({
     ),
     block_list: $ => repeat1(seq(
       $.block,
-      $._block_separator,
+      $._post_block_separator,
+      choice(
+        $._eof,
+        seq(repeat1(seq(/[ \t]*/, $._newline_token)), optional(seq(/[ \t]*/, $._eof))),
+      ),
     )),
-    // inline_text: $ => /[^\n]*[^\s]+[^\n]*/,
     inline_text: $ => prec(10, repeat1($._text_base)),
     _inline_whitespace: $ => /[ \t]+/,
 
     _newline_token: $ => /\n|\r\n?/,
 
+    _interpolated_block_end: $ => choice(
+      /[ \t\r\n]*##/,
+      seq($._post_block_separator, choice(
+        /[ \t\r\n]*##/,
+        seq(
+          repeat1(seq(/[ \t]*/, $._newline_token)),
+          $.block,
+          $._interpolated_block_end,
+        )
+      ))
+    ),
     _interpolated_block_list: $ => seq(
-      optional(/[ \t\n]+/),
+      optional(/[ \t\n\r]*/),
       $.block,
-      optional(repeat1(seq(
-        $._block_separator,
-        $.block,
-      ))),
-      optional(/[ \t\n]+/),
+      $._interpolated_block_end,
     ),
 
     /* INLINE
@@ -88,7 +107,7 @@ module.exports = grammar({
 
     _text_base: $ => choice(
       // /[^\n]*[^\s]+[^\n]*/,
-      /[A-Za-z \t=.,:;'"+\->]+/,
+      /[A-Za-z \t=.,:;'"+\->!]+/,
       // /[=.+\-]/,
       $._word,
       $._whitespace,
@@ -123,7 +142,7 @@ module.exports = grammar({
     script_interpolation: $ => seq(
       prec(10, $._script_interpolation_open),
       field('content', $._interpolated_block_list),
-      $._script_interpolation_close,
+      // $._script_interpolation_close,
     ),
 
     script_content: $ => repeat1(choice(
@@ -153,7 +172,7 @@ module.exports = grammar({
 
     script_block: $ => seq(
       $.scripting,
-      optional($._newline_token),
+      // optional($._newline_token),
     ),
 
     paragraph: $ => seq(
@@ -164,7 +183,7 @@ module.exports = grammar({
           $.inline_content,
         ))),
       )),
-      optional($._newline_token),
+      // optional($._newline_token),
     ),
 
     heading: $ => seq(
@@ -177,12 +196,12 @@ module.exports = grammar({
           $.inline_content,
         ))),
       )),
-      optional($._newline_token),
+      // optional($._newline_token),
     ),
 
     horizontal_rule: $ => seq(
       token(prec(10, /\-{3,80}/)),
-      optional($._newline_token),
+      // optional($._newline_token),
     ),
 
     ordered_list_item: $ => seq(
@@ -215,7 +234,7 @@ module.exports = grammar({
           $.ordered_list_item,
         ))),
       )),
-      optional($._newline_token),
+      // optional($._newline_token),
     ),
 
     checkbox_done: $ => choice('[x]', '[X]'),
